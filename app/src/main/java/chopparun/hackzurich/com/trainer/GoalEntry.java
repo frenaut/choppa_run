@@ -1,31 +1,39 @@
 package chopparun.hackzurich.com.trainer;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 public class GoalEntry extends AppCompatActivity {
+
+    public final static String GOAL_TIME = "com.chopparun.GOAL_TIME";
+    public final static String GOAL_DISTANCE = "com.chopparun.GOAL_DIST";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_goal_entry);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        Button startButton = (Button) findViewById(R.id.buttonStart);
+    }
+
+    public void startRunning(View view){
+        Intent intent = new Intent(this, RunningActivity.class);
+
+        EditText distanceInputView = (EditText) findViewById(R.id.goal_distance_input);
+        EditText timeInputView = (EditText) findViewById(R.id.goal_time_input);
+        int distance = Integer.valueOf(distanceInputView.getText().toString());
+        int time = Integer.valueOf(timeInputView.getText().toString());
+
+        intent.putExtra(GOAL_DISTANCE, distance);
+        intent.putExtra(GOAL_TIME, time);
+
+        startActivity(intent);
     }
 
     @Override

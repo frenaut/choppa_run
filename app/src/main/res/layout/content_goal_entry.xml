@@ -48,14 +48,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/goal_time"
-                android:id="@+id/textView2" />
+                android:id="@+id/goal_time_label" />
 
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:ems="10"
-                android:id="@+id/editText" />
+                android:id="@+id/goal_time_input" />
         </TableRow>
 
         <TableRow
@@ -67,14 +67,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/goal_distance"
-                android:id="@+id/textView3" />
+                android:id="@+id/goal_distance_label" />
 
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:ems="10"
-                android:id="@+id/editText2" />
+                android:id="@+id/goal_distance_input" />
         </TableRow>
 
         <TableRow
@@ -85,8 +85,9 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New Button"
-                android:id="@+id/button" />
+                android:text="@string/button_start"
+                android:id="@+id/buttonStart"
+                android:onClick="startRunning"/>
         </TableRow>
     </TableLayout>
 

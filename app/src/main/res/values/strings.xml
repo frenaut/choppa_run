@@ -6,4 +6,5 @@
     <string name="unit_distance">km</string>
     <string name="unit_time">min</string>
     <string name="button_start">Run!</string>
+    <string name="title_activity_running">RunningActivity</string>
 </resources>
