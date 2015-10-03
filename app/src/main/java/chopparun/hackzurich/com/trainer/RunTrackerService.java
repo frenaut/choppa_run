@@ -153,8 +153,13 @@ public class RunTrackerService extends Service implements SensorEventListener {
         int vel_normalized = (int)(100*vel/target_vel);
         int time_normalized = (int)(100*(elapsed_time)/(target_time_));
 
-        // TODO: Associate metrics with category
+        // Associate metrics with category
+        // TODO : more categories
+        String category="all_good";
+        if (vel_normalized < 5) category="stopping";
+        if (vel_normalized > 120) category="too_fast";
+        if (vel_normalized < 80) category ="too_slow";
 
-        return "Category"; // TODO: remove
+        return category; // TODO: remove
     }
 }
