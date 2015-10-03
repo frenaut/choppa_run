@@ -98,6 +98,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
         return START_NOT_STICKY; // If killed, system does not restart the service
     }
 
+    private Accelerometer accelerometer_;
     private Timer timer_ = new Timer();
 
     // Only called when service is started
@@ -105,7 +106,10 @@ public class RunTrackerService extends Service implements SensorEventListener {
     public void onCreate() {
         sensor_manager_ = (SensorManager)getSystemService(SENSOR_SERVICE);
         step_counter_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        sensor_manager_.registerListener(this, step_counter_, SensorManager.SENSOR_DELAY_FASTEST);
+        //sensor_manager_.registerListener(this, step_counter_, SensorManager.SENSOR_DELAY_FASTEST);
+
+        // Get accelerometer class instance
+        accelerometer_ = new Accelerometer(this);
 
         // TODO: Make run in foreground
 
@@ -117,6 +121,13 @@ public class RunTrackerService extends Service implements SensorEventListener {
                 check();
             }
         }, new Date(), 3000);
+    }
+
+    @Override
+    public void onDestroy() {
+        accelerometer_.onDestroy();
+
+        sensor_manager_.unregisterListener(this);
     }
 
     // Main pipeline
@@ -163,11 +174,13 @@ public class RunTrackerService extends Service implements SensorEventListener {
         }
 
         // Append new cumulative step count to steps_ with condition for empty steps
-        steps_.add(new_step_count);
+        if (index + 1 == steps_.size()) steps_.set(index, new_step_count);
+        else steps_.add(new_step_count);
     }
 
     private MediaPlayer media_player_ = null;
     private boolean playing_ = false;
+    int previous_track_;
     Random _rand = new Random();
 
     // play_audio plays a random audio file from a category
@@ -187,10 +200,15 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
         // Choose random audio file from list of selected files
         Field field = selected.get(_rand.nextInt(selected.size()));
-        Context context = getApplicationContext();
         if (media_player_ != null) media_player_.release();
+
+        int next_track_;
         try {
-            media_player_ = MediaPlayer.create(context, field.getInt(field));
+            next_track_ = field.getInt(field);
+            if (next_track_ == previous_track_) return;
+
+            Context context = getApplicationContext();
+            media_player_ = MediaPlayer.create(context, next_track_);
             media_player_.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
                     mp.release();
@@ -199,6 +217,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
             });
             media_player_.start();
             playing_ = true;
+            previous_track_ = next_track_;
         } catch (Exception e) {
             Log.e(TAG, "play_audio.MediaPlayer: " + e.toString());
         }
@@ -249,8 +268,8 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
         // Flags to help understand metrics
         boolean speed_stopped = vel_normalized < 26;
-        boolean speed_slow    = vel_normalized > 25 && vel_normalized < 66;
-        boolean speed_good    = vel_normalized > 65 && vel_normalized < 111;
+        boolean speed_slow    = vel_normalized > 25 && vel_normalized < 86;
+        boolean speed_good    = vel_normalized > 85 && vel_normalized < 111;
         boolean speed_fast    = vel_normalized > 110 && vel_normalized < 131;
         boolean speed_toofast = vel_normalized > 130;
 
@@ -262,7 +281,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
         // Associate metrics with category
         // TODO : more categories
         String category = "all_good";
-        if (speed_stopped) category = "stopped";
+        if (speed_stopped) category = "stopping";
         else if (speed_slow) category = "too_slow";
 
         if (time_start) {
