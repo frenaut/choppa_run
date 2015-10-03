@@ -29,14 +29,14 @@ public class RunTrackerService extends Service implements SensorEventListener {
     /* Steps counting related */
     ArrayList<Integer> steps_ ;// All steps accumulated. New cumulative step counts are appended.
     private long start_time_;  // Timestamp for value at steps_[0] (in ms, new Date().getTime())
-    private int  dtime_ = 500; // ms between each entry in steps_[]
+    private long dtime_ = 500; // ms between each entry in steps_[]
 
     /*
         Personalization related
         - Take onCreate from RunningActivity (input in GoalEntry)
      */
-    private int target_time_; // in seconds
-    private int target_dist_; // in meters
+    private int target_time_ = 600000; // in ms     (TODO: retrieve from activity)
+    private int target_dist_ = 1000;   // in meters (TODO: retrieve from activity)
 
     //----------------------------------------------------------------------------------------------
 
@@ -83,11 +83,13 @@ public class RunTrackerService extends Service implements SensorEventListener {
     public void onCreate() {
         sensor_manager_ = (SensorManager)getSystemService(SENSOR_SERVICE);
         step_counter_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        sensor_manager_.registerListener(this, step_counter_, SensorManager.SENSOR_DELAY_GAME);
+        sensor_manager_.registerListener(this, step_counter_, SensorManager.SENSOR_DELAY_FASTEST);
 
         // TODO: Make run in foreground
-        // Initialize data structures
+
         steps_= new ArrayList<>();
+        start_time_ = new Date().getTime();
+
         // TODO: Start audio manager?
     }
 
@@ -109,8 +111,9 @@ public class RunTrackerService extends Service implements SensorEventListener {
     private void updateSteps(long current_time, int new_step_count) {
         // Calculate index for current_time
         int index = (int)((current_time - start_time_)/dtime_); // this is ugly...
+
         // Fill empty time slots in steps_
-        int last_step_count = steps_.get(steps_.size()-1);
+        int last_step_count = steps_.size() == 0 ? new_step_count : steps_.get(steps_.size()-1);
         for (int i=0;i<index;i++) {
             steps_.add(i,last_step_count);
         }
@@ -159,6 +162,8 @@ public class RunTrackerService extends Service implements SensorEventListener {
         if (vel_normalized < 5) category="stopping";
         if (vel_normalized > 120) category="too_fast";
         if (vel_normalized < 80) category ="too_slow";
+
+        Log.d(TAG, "Category picked: " + category);
 
         return category; // TODO: remove
     }
