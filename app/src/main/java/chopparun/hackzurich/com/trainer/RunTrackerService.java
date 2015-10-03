@@ -218,7 +218,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
             }
 
             //       - avg. velocity needed to reach goal
-            target_vel = left_dist*1e3 / left_time; // in m/s
+            target_vel = left_time > 0 ? left_dist*1e3 / left_time : target_dist_ / target_time_; // in m/s
         }
 
 
@@ -239,14 +239,38 @@ public class RunTrackerService extends Service implements SensorEventListener {
         vel_normalized = (int) (target_vel == 0? 0: (100*vel/target_vel));
         time_normalized = (int) (target_time_ == 0? 0: (100*elapsed_time/target_time_));
 
+        // Flags to help understand metrics
+        boolean speed_stopped = vel_normalized < 26;
+        boolean speed_slow    = vel_normalized > 25 && vel_normalized < 66;
+        boolean speed_good    = vel_normalized > 65 && vel_normalized < 111;
+        boolean speed_fast    = vel_normalized > 110 && vel_normalized < 131;
+        boolean speed_toofast = vel_normalized > 130;
+
+        boolean time_start  = time_normalized < 31;
+        boolean time_middle = time_normalized > 30 && time_normalized < 81;
+        boolean time_end    = time_normalized > 80 && time_normalized < 101;
+        boolean time_more   = time_normalized > 100;
+
         // Associate metrics with category
         // TODO : more categories
-        String category="all_good";
-        if (time_normalized >0 && time_normalized< 80 && vel_normalized > 140) category="too_fast";
-        if (vel_normalized < 60 && vel_normalized > 0) category ="too_slow";
-        if (vel_normalized < 40 && vel_normalized > 0) category="stopping";
-        if (time_normalized > 80 && vel_normalized>90) category="perfect";
-        if (time_normalized > 100 && vel_normalized<30) category="finish";
+        String category = "all_good";
+        if (speed_stopped) category = "stopped";
+        else if (speed_slow) category = "too_slow";
+
+        if (time_start) {
+            if (speed_toofast) category = "too_fast";
+        }
+        if (time_middle) {
+            if (speed_good) category = "perfect";
+            else if (speed_toofast) category = "too_fast";
+        } else if (time_end) {
+            if (speed_good) category = "all_good";
+            else if (speed_fast) category = "perfect";
+        } else if (time_more) {
+            if (speed_stopped) category = "finish";
+            else if (speed_good) category = "all_good";
+            else if (speed_fast) category = "perfect";
+        }
         Log.d(TAG, "Normalized velocity: "+ vel_normalized);
         Log.d(TAG, "Category picked: " + category);
 
