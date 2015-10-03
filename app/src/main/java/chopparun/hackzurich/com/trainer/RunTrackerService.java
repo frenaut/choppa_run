@@ -2,9 +2,11 @@ package chopparun.hackzurich.com.trainer;
 
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Path;
 import android.os.IBinder;
 import android.util.Log;
 import java.util.Date;
+import java.util.Random;
 
 /*
     RunTrackerService is started and stopped by RunningActivity
@@ -27,8 +29,8 @@ public abstract class RunTrackerService extends Service {
         Personalization related
         - Take onCreate from RunningActivity (input in GoalEntry)
      */
-    private int target_time; // in seconds
-    private int target_dist; // in meters
+    private int target_time_; // in seconds
+    private int target_dist_; // in meters
 
     //----------------------------------------------------------------------------------------------
 
@@ -77,10 +79,25 @@ public abstract class RunTrackerService extends Service {
     private String decide_category(long current_time) {
         // TODO: Calculate metrics
         //       - distance left (target_dist - k * steps so far)
+        int new_step_count = 0;
+        if (steps_.length!=0) {
+            new_step_count = steps_[steps_.length-1];
+        }
+        int left_dist = target_dist_-new_step_count;
+
         //       - current velocity (over past 10s)
+        double vel = 0;
+        if (steps_.length>21)   {
+            // at 500ms per entry, 10s corresponds to 20 entries ago
+            vel = new_step_count - steps_[steps_.length-21];
+            vel = vel/10; // in m/s
+        }
         //       - current acceleration (over past 10s) - Need to store velocities
-        //       - avg. velocity needed to reach goal
         //       - time left
+        int left_time = (int)(start_time_-current_time)+target_time_;
+        //       - avg. velocity needed to reach goal
+        double target_vel = left_dist / (left_time*1e3);
+
 
         // TODO: Normalize metrics by target
 
