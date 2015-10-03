@@ -25,7 +25,7 @@ import chopparun.hackzurich.com.trainer.utilities._LocationListener;
 /*
     RunTrackerService is started and stopped by RunningActivity
  */
-public class RunTrackerService extends Service implements SensorEventListener {
+public class RunTrackerService extends Service {
     // TAG for use in logging
     private static final String TAG = "RunTrackerService";
 
@@ -56,19 +56,6 @@ public class RunTrackerService extends Service implements SensorEventListener {
         return total_dist_;
     }
     public long getTime(){return (new Date().getTime()-start_time_);}
-    //----------------------------------------------------------------------------------------------
-
-    SensorManager sensor_manager_;
-    Sensor step_counter_;
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        int new_step_count = (int)event.values[0];
-        onStepCount(new_step_count);
-    }
-
     //----------------------------------------------------------------------------------------------
 
     private final IBinder binder_ = new LocalBinder();
@@ -104,15 +91,11 @@ public class RunTrackerService extends Service implements SensorEventListener {
     // Only called when service is started
     @Override
     public void onCreate() {
-        sensor_manager_ = (SensorManager)getSystemService(SENSOR_SERVICE);
-        step_counter_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        //sensor_manager_.registerListener(this, step_counter_, SensorManager.SENSOR_DELAY_FASTEST);
-
         // Get accelerometer class instance
         accelerometer_ = new Accelerometer(this);
 
         // Get _LocationListener
-        location_listener_ = new _LocationListener(this);
+        //location_listener_ = new _LocationListener(this);
 
         // TODO: Make run in foreground
 
@@ -133,8 +116,6 @@ public class RunTrackerService extends Service implements SensorEventListener {
         accelerometer_.onDestroy();
         location_listener_.onDestroy();
 
-        sensor_manager_.unregisterListener(this);
-
         if (media_player_ != null) {
             media_player_.release();
         }
@@ -151,11 +132,13 @@ public class RunTrackerService extends Service implements SensorEventListener {
     }
 
     // Main pipeline
-    public void onStepCount(int new_step_count) {
+    public void onStepCount(int new_step_count, float dist_meas) {
         Log.d(TAG, "new_step_count = " + String.valueOf(new_step_count));
 
         long current_time = new Date().getTime();
         addSteps(current_time, new_step_count);
+
+        total_dist_ += dist_meas / 0.95e6;
     }
 
     public void check() {

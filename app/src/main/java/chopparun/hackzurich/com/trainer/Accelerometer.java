@@ -8,6 +8,8 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.util.Date;
+
 public class Accelerometer implements SensorEventListener {
     private final String TAG = "Accelerometer";
 
@@ -21,9 +23,9 @@ public class Accelerometer implements SensorEventListener {
     //----------------------------------------------------------------------------------------------
 
     // Accelerometer
-    float ax;
-    float ay;
-    float az;
+    private float ax, ay, az;
+    private float px, py, pz;
+    private float nx, ny, nz;
 
     // Rotation
     float[] R = new float[9];
@@ -37,10 +39,11 @@ public class Accelerometer implements SensorEventListener {
         sensor_manager_ = (SensorManager) ctx.getSystemService(Context.SENSOR_SERVICE);
 
         rotation_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        sensor_manager_.registerListener(this, rotation_, SensorManager.SENSOR_DELAY_FASTEST);
+        //sensor_manager_.registerListener(this, rotation_, SensorManager.SENSOR_DELAY_FASTEST);
 
         // Gravity removed
         acceleration_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+        sensor_manager_.registerListener(this, acceleration_, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -55,22 +58,32 @@ public class Accelerometer implements SensorEventListener {
             SensorManager.getRotationMatrixFromVector(R, event.values);
 
             if (!rotation_ready_) {
-                sensor_manager_.registerListener(this, acceleration_, SensorManager.SENSOR_DELAY_FASTEST);
+                sensor_manager_.registerListener(this, acceleration_, SensorManager.SENSOR_DELAY_GAME);
                 rotation_ready_ = true;
             }
         } else if (event.sensor == acceleration_) {
+            px = ax; py = ay; pz = az;
+            ax = nx; ay = ny; az = nz;
+
             // The acc sensor returns 3 values
-            ax = event.values[0];
-            ay = event.values[1];
-            az = event.values[2];
+            nx = event.values[0];
+            ny = event.values[1];
+            nz = event.values[2];
+
+            // Try to smooth
+            ax = 0.3333f * (px + ax + nx);
+            ay = 0.3333f * (py + ay + ny);
+            az = 0.3333f * (pz + az + nz);
             //Log.d(TAG, "Acc: " + String.valueOf(ax) + ", " + String.valueOf(ay) + ", " + String.valueOf(az));
 
+            /*
             // Multiply acceleration by R.t
             float nax = R[0]*ax + R[3]*ay + R[6]*az,
                   nay = R[1]*ax + R[4]*ay + R[7]*az,
                   naz = R[2]*ax + R[5]*ay + R[8]*az;
 
             ax = nax; ay = nay; az = naz;
+            */
             //Log.d(TAG, "Fixed acc: " + String.valueOf(nax) + ", " + String.valueOf(nay) + ", " + String.valueOf(naz));
 
             /*
@@ -106,35 +119,49 @@ public class Accelerometer implements SensorEventListener {
         }
     }
 
-    private float A_4 = 0;
-    private float A_3 = 0;
-    private float A_2 = 0; // magnitude of acc 2 readings prior
-    private float A_1 = 0; // magnitude of acc 1 reading prior
-    private boolean step_state_ = false;
+    private float A_4 = 0, A_3 = 0, A_2 = 0, A_1 = 0; // magnitude of acc 4,3,2,1 reading prior
+    private long t_4, t_3, t_2, t_1; // timestamps of 4,3,2,1 reading prior
+    {
+        long t = new Date().getTime();
+        t_4 = t_3 = t_2 = t_1 = t;
+    }
+    private float v_4, v_3, v_2, v_1;
+    private float d_4, d_3, d_2, d_1;
+
     private int total_steps = 0;
 
     private void detectStep() {
-        float A = (float)Math.sqrt(ax*ax + ay*ay);
+        float A = (float)Math.sqrt(ax*ax + ay*ay + az*az);
+        long t = new Date().getTime();
         //Log.d(TAG, "Acc: " + String.valueOf(A));
 
-        float min_ = 0.5f;
+        float v = 0.5f * ((t_4 - t_3) * (A_4 + A_3) + (t_3 - t_2) * (A_3 + A_2) +
+                  (t_2 - t_1) * (A_2 + A_1) + (t_1 - t) * (A_1 + A));
+        v = Math.abs(v);
+        float d = 0.5f * ((t_4 - t_3) * (v_4 + v_3) + (t_3 - t_2) * (v_3 + v_2) +
+                (t_2 - t_1) * (v_2 + v_1) + (t_1 - t) * (v_1 + v));
+        d = Math.abs(d);
+
+        float min_ = 0.1f;
+        if (A_2 > A_4 && A_2 > A_3 && A_2 > A_1 && A_2 > A && (A_2 - A_4) > min_ && (A_2 - A) > min_)
+            Log.d(TAG, "Maximum: " + String.valueOf(A_2));
+        if (A_2 < A_4 && A_2 < A_3 && A_2 < A_1 && A_2 < A && (A_4 - A_2) > min_ && (A - A_2) > min_)
+            Log.d(TAG, "Minimum: " + String.valueOf(A_2));
+        
         if (A_2 > A_4 && A_2 > A_3 && A_2 > A_1 && A_2 > A &&
                 (A_2 - A_4) > min_ && (A_2 - A) > min_) {
-            if (step_state_) { // On step up
-                total_steps += 1;
-                ctx.onStepCount(total_steps);
-            }
-            step_state_ = !step_state_;
+            total_steps += 1;
+            //Log.d(TAG, "v: " + String.valueOf(v) + ", d: " + String.valueOf(d));
+            ctx.onStepCount(total_steps, d);
         }
 
-        A_4 = A_3;
-        A_3 = A_2;
-        A_2 = A_1;
-        A_1 = A;
+        A_4 = A_3; A_3 = A_2; A_2 = A_1; A_1 = A;
+        t_4 = t_3; t_3 = t_2; t_2 = t_1; t_1 = t;
+        v_4 = v_3; v_3 = v_2; v_2 = v_1; v_1 = v;
+        d_4 = d_3; d_3 = d_2; d_2 = d_1; d_1 = d;
     }
 
     protected void onDestroy() {
         sensor_manager_.unregisterListener(this);
     }
 }
-
