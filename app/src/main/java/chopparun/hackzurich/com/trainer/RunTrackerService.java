@@ -3,6 +3,10 @@ package chopparun.hackzurich.com.trainer;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.Path;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -12,7 +16,7 @@ import java.util.Date;
 /*
     RunTrackerService is started and stopped by RunningActivity
  */
-public class RunTrackerService extends Service {
+public class RunTrackerService extends Service implements SensorEventListener {
     // TAG for use in logging
     private static final String TAG = "RunTrackerService";
 
@@ -32,6 +36,17 @@ public class RunTrackerService extends Service {
      */
     private int target_time_; // in seconds
     private int target_dist_; // in meters
+
+    //----------------------------------------------------------------------------------------------
+
+    SensorManager sensor_manager_;
+    Sensor step_counter_;
+
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+    public void onSensorChanged(SensorEvent event) {
+        int new_step_count = (int)event.values[0];
+        onStepCount(new_step_count);
+    }
 
     //----------------------------------------------------------------------------------------------
 
@@ -65,14 +80,19 @@ public class RunTrackerService extends Service {
     // Only called when service is started
     @Override
     public void onCreate() {
+        sensor_manager_ = (SensorManager)getSystemService(SENSOR_SERVICE);
+        step_counter_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        sensor_manager_.registerListener(this, step_counter_, SensorManager.SENSOR_DELAY_GAME);
+
         // TODO: Make run in foreground
         // TODO: Initialize data structures
         // TODO: Start audio manager?
     }
 
     // Main pipeline
-    public void onStepCount() {
-        int new_step_count = 0; // TODO: Read out step count
+    public void onStepCount(int new_step_count) {
+        Log.d(TAG, "new_step_count = " + String.valueOf(new_step_count));
+
         long current_time = new Date().getTime();
         String category;
 
