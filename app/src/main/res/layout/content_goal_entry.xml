@@ -22,32 +22,38 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
             android:id="@+id/TrainerRow">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="-3dp"
+                android:gravity="center"
                 android:id="@+id/Picker_Sammi"
-                android:onClick="pickTrainer"
-                android:focusable="false"
-                android:focusableInTouchMode="true" />
+                android:onClick="pickTrainer" />
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginLeft="-3dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="-3dp"
+                android:gravity="center"
                 android:id="@+id/Picker_Arnie"
-                android:layout_gravity=""
-                android:onClick="pickTrainer"
-                />
+                android:onClick="pickTrainer" />
 
-            <ImageView
+            <!--<ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/Picker_3"
                 android:onClick="pickTrainer"
-                />
+                />-->
 
         </LinearLayout>
 

@@ -29,8 +29,8 @@ public class GoalEntry extends AppCompatActivity {
     private final static String GOAL_DISTANCE = "com.chopparun.GOAL_DIST";
     private final static String TRAINER = "com.chopparun.TRAINER";
 
-    private int curr_Picker = R.id.Picker_Arnie;
-    private static String coach = "ARNIE";
+    private int curr_Picker = -1; // = R.id.Picker_Arnie;
+    private static String coach = "arnie";
 
     protected static int SCREEN_WIDTH;
     protected static int IMG_WIDTH, IMG_HEIGHT,LARGE_IMG_WIDTH,LARGE_IMG_HEIGHT;
@@ -55,8 +55,6 @@ public class GoalEntry extends AppCompatActivity {
         SCREEN_WIDTH = size.x;
         IMG_WIDTH = SCREEN_WIDTH/5;
         IMG_HEIGHT = SCREEN_WIDTH/5;
-        LARGE_IMG_WIDTH = SCREEN_WIDTH/3;
-        LARGE_IMG_HEIGHT = SCREEN_WIDTH/3;
 
         Log.i(TAG,""+LARGE_IMG_WIDTH+IMG_WIDTH);
         setContentView(R.layout.activity_goal_entry);
@@ -70,13 +68,15 @@ public class GoalEntry extends AppCompatActivity {
         arnie = (ImageView) findViewById(R.id.Picker_Arnie);
         Bitmap head_arnie = BitmapFactory.decodeResource(getResources(), R.drawable.arnie_head, options);
         head_arnie_drawable = ImageHelper.getRoundedCornerBitmap(head_arnie);
-        arnie.setImageBitmap(Bitmap.createScaledBitmap(head_arnie_drawable, LARGE_IMG_WIDTH, LARGE_IMG_WIDTH, false));;
+        arnie.setImageBitmap(Bitmap.createScaledBitmap(head_arnie_drawable, IMG_WIDTH, IMG_WIDTH, false));;
 
         // pick arnie as default
         sammi = (ImageView) findViewById(R.id.Picker_Sammi);
         Bitmap head_sammi = BitmapFactory.decodeResource(getResources(), R.drawable.sammi_head, options);
         head_sammi_drawable = ImageHelper.getRoundedCornerBitmap(head_sammi);
         sammi.setImageBitmap(Bitmap.createScaledBitmap(head_sammi_drawable, IMG_WIDTH, IMG_WIDTH, false));
+
+        pickTrainer(findViewById(R.id.Picker_Arnie));
     }
 
     public void startRunning(View view){
@@ -99,23 +99,22 @@ public class GoalEntry extends AppCompatActivity {
     public void pickTrainer(View view){
 
         int trainer = view.getId();
-        Log.i(TAG, ""+view.getWidth());
-        Log.i(TAG, ""+findViewById(curr_Picker).getWidth());
+        if (trainer == curr_Picker) return;
+
         switch (trainer){
             case R.id.Picker_Arnie:
-                coach = "ARNIE";
-
+                coach = "arnie";
                 break;
             case R.id.Picker_Sammi:
-                coach = " SAMMI";
-                break;
-            case R.id.Picker_3:
-                coach = " ";
+                coach = "samuel";
                 break;
         }
         // enlarge selected picker
-        view.setLayoutParams(new RelativeLayout.LayoutParams(LARGE_IMG_WIDTH, LARGE_IMG_HEIGHT));
-        findViewById(curr_Picker).setLayoutParams(new RelativeLayout.LayoutParams(IMG_WIDTH, IMG_HEIGHT));
+        float scaleUp = 1.4f;
+        float scaleDn = 1.0f;
+        view.animate().scaleX(scaleUp).scaleY(scaleUp).setDuration(500).start();
+        if (curr_Picker != -1)
+            findViewById(curr_Picker).animate().scaleX(scaleDn).scaleY(scaleDn).setDuration(500).start();
         curr_Picker = trainer;
     }
     @Override
