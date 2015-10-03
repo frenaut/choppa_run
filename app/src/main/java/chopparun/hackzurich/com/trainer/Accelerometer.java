@@ -1,6 +1,5 @@
 package chopparun.hackzurich.com.trainer;
 
-
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -15,19 +14,13 @@ public class Accelerometer implements SensorEventListener {
     private Context ctx;
     public Accelerometer(Context context) {
         ctx = context;
-    }
-
-    @Override
-    public final void onCreate(Bundle savedInstanceState) {
-
         sensor_manager_ = (SensorManager) ctx.getSystemService(Context.SENSOR_SERVICE);
         accelerometer_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensor_manager_.registerListener(this, accelerometer_, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-
     @Override
-    public final void onAccuracyChanged(accelerometer_, int accuracy) {
+    public final void onAccuracyChanged(Sensor sensor, int accuracy) {
         // Do something here if sensor accuracy changes.
     }
 
@@ -40,8 +33,6 @@ public class Accelerometer implements SensorEventListener {
         // Do something with this sensor value.
     }
 
-
-    @Override
     protected void onDestroy() {
 
     }
