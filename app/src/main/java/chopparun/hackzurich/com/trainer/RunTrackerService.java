@@ -3,15 +3,16 @@ package chopparun.hackzurich.com.trainer;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.Path;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import java.util.Date;
-import java.util.Random;
+
 
 /*
     RunTrackerService is started and stopped by RunningActivity
  */
-public abstract class RunTrackerService extends Service {
+public class RunTrackerService extends Service {
     // TAG for use in logging
     private static final String TAG = "RunTrackerService";
 
@@ -34,14 +35,35 @@ public abstract class RunTrackerService extends Service {
 
     //----------------------------------------------------------------------------------------------
 
+    private final IBinder binder_ = new LocalBinder();
+
+    // Called when Activity (client) binds to service. Allows communication.
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d(TAG, "onBind called");
+        return binder_;
+    }
+
+    public class LocalBinder extends Binder {
+        RunTrackerService getService() {
+            // Allows client to call public methods in RunTrackerService
+            return RunTrackerService.this;
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------
+
     // Called whenever activity requests the service to be started
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Tell activity about state
+        Log.d(TAG, "onStartCommand called");
 
         return START_NOT_STICKY; // If killed, system does not restart the service
     }
 
     // Only called when service is started
+    @Override
     public void onCreate() {
         // TODO: Make run in foreground
         // TODO: Initialize data structures

@@ -9,35 +9,40 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/activity_goal_entry" tools:context=".GoalEntry">
 
-    <TableLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:id="@+id/tableLayout">
+        android:id="@+id/tableLayout"
+        android:stretchColumns="*">
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:contextClickable="false"
-            android:gravity="center_horizontal"
-            android:textAlignment="center">
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
 
-            <ImageButton
-                android:layout_width="wrap_content"
+            <ImageView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/TrainerPicker1" />
+                android:id="@+id/TrainerPicker1"
+                android:onClick="pickTrainer"
+                android:layout_weight="1"/>
 
-            <ImageButton
-                android:layout_width="wrap_content"
+            <ImageView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/TrainerPicker2" />
+                android:id="@+id/TrainerPicker2"
+                android:layout_weight="1"/>
 
-            <ImageButton
-                android:layout_width="wrap_content"
+            <ImageView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/TrainerPicker3" />
-        </TableRow>
+                android:id="@+id/TrainerPicker3"
+                android:layout_weight="1"/>
+
+        </LinearLayout>
 
         <TableRow
             android:layout_width="match_parent"
@@ -55,7 +60,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:ems="10"
-                android:id="@+id/goal_time_input" />
+                android:id="@+id/goal_time_input"
+                android:layout_span="2" />
         </TableRow>
 
         <TableRow
@@ -74,7 +80,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:ems="10"
-                android:id="@+id/goal_distance_input" />
+                android:id="@+id/goal_distance_input"
+                android:layout_span="2" />
         </TableRow>
 
         <TableRow
@@ -89,6 +96,6 @@
                 android:id="@+id/buttonStart"
                 android:onClick="startRunning"/>
         </TableRow>
-    </TableLayout>
+    </LinearLayout>
 
 </RelativeLayout>
