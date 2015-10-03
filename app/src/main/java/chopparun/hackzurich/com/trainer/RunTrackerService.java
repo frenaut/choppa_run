@@ -246,8 +246,8 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
         // Flags to help understand metrics
         boolean speed_stopped = vel_normalized < 26;
-        boolean speed_slow    = vel_normalized > 25 && vel_normalized < 66;
-        boolean speed_good    = vel_normalized > 65 && vel_normalized < 111;
+        boolean speed_slow    = vel_normalized > 25 && vel_normalized < 86;
+        boolean speed_good    = vel_normalized > 85 && vel_normalized < 111;
         boolean speed_fast    = vel_normalized > 110 && vel_normalized < 131;
         boolean speed_toofast = vel_normalized > 130;
 
@@ -259,7 +259,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
         // Associate metrics with category
         // TODO : more categories
         String category = "all_good";
-        if (speed_stopped) category = "stopped";
+        if (speed_stopped) category = "stopping";
         else if (speed_slow) category = "too_slow";
 
         if (time_start) {
