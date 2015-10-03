@@ -48,15 +48,18 @@ public class RunTrackerService extends Service implements SensorEventListener {
     //----------------------------------------------------------------------------------------------
 
     public void setCoach(String coach) { coach_ = coach; }
-    public void setTime(int target) { target_time_ = target; }
-    public void setDist(int target) { target_dist_ = target; }
-
+    public void setTime(long target) { target_time_ = target; }
+    public void setDist(long target) { target_dist_ = target; }
+    public long getDist(){return steps_.get(steps_.size()-1);}
+    public long getTime(){return (new Date().getTime()-start_time_);}
     //----------------------------------------------------------------------------------------------
 
     SensorManager sensor_manager_;
     Sensor step_counter_;
 
+    @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+    @Override
     public void onSensorChanged(SensorEvent event) {
         int new_step_count = (int)event.values[0];
         onStepCount(new_step_count);
@@ -108,7 +111,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
             public void run() {
                 check();
             }
-        }, new Date(), 500);
+        }, new Date(), 3000);
     }
 
     // Main pipeline
