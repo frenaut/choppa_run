@@ -46,6 +46,12 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
     //----------------------------------------------------------------------------------------------
 
+    public void setCoach(String coach) { coach_ = coach; }
+    public void setTime(int target) { target_time_ = target; }
+    public void setDist(int target) { target_dist_ = target; }
+
+    //----------------------------------------------------------------------------------------------
+
     SensorManager sensor_manager_;
     Sensor step_counter_;
 
@@ -178,6 +184,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
                     playing_ = false;
+                    mp.release();
                 }
             });
             mediaPlayer.start();

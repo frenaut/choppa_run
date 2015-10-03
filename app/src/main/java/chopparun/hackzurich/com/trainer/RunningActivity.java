@@ -1,6 +1,7 @@
 package chopparun.hackzurich.com.trainer;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -18,9 +19,19 @@ import chopparun.hackzurich.com.trainer.RunTrackerService.LocalBinder;
 public class RunningActivity extends AppCompatActivity {
     private final String TAG = "RunningActivity";
 
+    private String coach_;
+    private int target_time_;
+    private int target_dist_;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        coach_ = intent.getStringExtra(GoalEntry.TRAINER);
+        target_time_ = intent.getIntExtra(GoalEntry.GOAL_TIME, 1) * 60000;
+        target_dist_ = intent.getIntExtra(GoalEntry.GOAL_DISTANCE, 150);
+
         setContentView(R.layout.activity_running);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -39,12 +50,17 @@ public class RunningActivity extends AppCompatActivity {
     }
 
     private boolean bound_ = false;
-    private Service service_;
+    private RunTrackerService service_;
     private ServiceConnection connection_ = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             LocalBinder binder = (LocalBinder) service;
             service_ = binder.getService();
+            service_.setCoach(coach_);
+            service_.setDist(target_dist_);
+            service_.setTime(target_time_);
+            Log.d(TAG, "Will run for coach " + coach_ + " and target distance/time: " + target_dist_ +
+                "/" + target_time_);
             bound_ = true;
             Log.d(TAG, "Bound to RunTrackerService");
         }
