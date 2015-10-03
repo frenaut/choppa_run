@@ -1,7 +1,5 @@
 package chopparun.hackzurich.com.trainer;
 
-import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -17,8 +15,6 @@ import chopparun.hackzurich.com.trainer.RunTrackerService.LocalBinder;
 
 public class RunningActivity extends AppCompatActivity {
     private final String TAG = "RunningActivity";
-    private long targetTime;
-    private long targetDistance;
     private TextView TimeElapsed,StepsElapsed;
 
     private String coach_;
@@ -38,9 +34,6 @@ public class RunningActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        targetTime = (long) this.getIntent().getIntExtra(GoalEntry.GOAL_DISTANCE,0)*60000;
-        targetDistance = (long) this.getIntent().getIntExtra(GoalEntry.GOAL_TIME,0);
     }
 
     @Override
@@ -49,14 +42,32 @@ public class RunningActivity extends AppCompatActivity {
 
         // Start RunTrackerService if not started
         Intent intent = new Intent(this, RunTrackerService.class);
-        Log.d(TAG, "Calling bindService");
-        Bundle mBundle = new Bundle();
-        mBundle.putLong(GoalEntry.GOAL_DISTANCE,targetDistance);
-        mBundle.putLong(GoalEntry.GOAL_TIME,targetTime);
-        intent.putExtras(mBundle);
-
         startService(intent);
-        bindService(intent, connection_, Context.BIND_AUTO_CREATE);
+        if (!bound_) {
+            Log.d(TAG, "bindService onStart");
+            bindService(intent, connection_, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!bound_) {
+            Log.d(TAG, "bindService onResume");
+            Intent intent = new Intent(this, RunTrackerService.class);
+            bindService(intent, connection_, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (bound_) {
+            unbindService(connection_);
+            bound_ = false;
+        }
     }
 
     private boolean bound_ = false;

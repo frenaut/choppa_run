@@ -87,8 +87,6 @@ public class RunTrackerService extends Service implements SensorEventListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Tell activity about state
         Log.d(TAG, "onStartCommand called");
-        target_dist_ = intent.getExtras().getLong(GoalEntry.GOAL_DISTANCE);
-        target_time_ = intent.getExtras().getLong(GoalEntry.GOAL_TIME);
         return START_NOT_STICKY; // If killed, system does not restart the service
     }
 
@@ -160,6 +158,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
         steps_.add(new_step_count);
     }
 
+    private MediaPlayer media_player_ = null;
     private boolean playing_ = false;
     Random _rand = new Random();
 
@@ -181,15 +180,16 @@ public class RunTrackerService extends Service implements SensorEventListener {
         // Choose random audio file from list of selected files
         Field field = selected.get(_rand.nextInt(selected.size()));
         Context context = getApplicationContext();
+        if (media_player_ != null) media_player_.release();
         try {
-            MediaPlayer mediaPlayer = MediaPlayer.create(context, field.getInt(field));
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            media_player_ = MediaPlayer.create(context, field.getInt(field));
+            media_player_.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
-                    playing_ = false;
                     mp.release();
+                    playing_ = false;
                 }
             });
-            mediaPlayer.start();
+            media_player_.start();
             playing_ = true;
         } catch (Exception e) {
             Log.e(TAG, "play_audio.MediaPlayer: " + e.toString());
