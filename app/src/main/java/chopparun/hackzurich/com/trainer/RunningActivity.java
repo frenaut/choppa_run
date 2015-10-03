@@ -1,5 +1,6 @@
 package chopparun.hackzurich.com.trainer;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.TextView;
-
+import android.view.View;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -97,13 +98,17 @@ public class RunningActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        if (bound_) {
-            unbindService(connection_);
-            bound_ = false;
-        }
-
-
     }
+
+    public void StopRunning(View view){
+        if(bound_){
+          unbindService(connection_);
+        }
+        Intent intent = new Intent(this, RunTrackerService.class);
+        stopService(intent);
+        startActivity(new Intent(this, GoalEntry.class));
+    }
+
 
     private boolean bound_ = false;
     private RunTrackerService service_;
