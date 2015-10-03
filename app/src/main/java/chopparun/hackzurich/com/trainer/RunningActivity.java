@@ -42,14 +42,32 @@ public class RunningActivity extends AppCompatActivity {
 
         // Start RunTrackerService if not started
         Intent intent = new Intent(this, RunTrackerService.class);
-        Log.d(TAG, "Calling bindService");
-        Bundle mBundle = new Bundle();
-        mBundle.putLong(GoalEntry.GOAL_DISTANCE,target_time_);
-        mBundle.putLong(GoalEntry.GOAL_TIME, target_time_);
-        intent.putExtras(mBundle);
-
         startService(intent);
-        bindService(intent, connection_, Context.BIND_AUTO_CREATE);
+        if (!bound_) {
+            Log.d(TAG, "bindService onStart");
+            bindService(intent, connection_, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!bound_) {
+            Log.d(TAG, "bindService onResume");
+            Intent intent = new Intent(this, RunTrackerService.class);
+            bindService(intent, connection_, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (bound_) {
+            unbindService(connection_);
+            bound_ = false;
+        }
     }
 
     private boolean bound_ = false;
