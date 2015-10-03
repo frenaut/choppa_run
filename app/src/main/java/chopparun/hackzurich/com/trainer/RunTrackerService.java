@@ -86,6 +86,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
         // TODO: Make run in foreground
         // TODO: Initialize data structures
+        steps_= new int[]{};
         // TODO: Start audio manager?
     }
 
@@ -96,7 +97,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
         long current_time = new Date().getTime();
         String category;
 
-        updateSteps_(current_time, new_step_count);
+        updateSteps(current_time, new_step_count);
 
         category = decide_category(current_time);
 
@@ -104,9 +105,9 @@ public class RunTrackerService extends Service implements SensorEventListener {
     }
 
     // Update steps_ list
-    private void updateSteps_(long current_time, int new_step_count) {
+    private void updateSteps(long current_time, int new_step_count) {
         // TODO: Calculate index for current_time
-        // TODO: Append new cumulative step count to steps_
+        // TODO: Append new cumulative step count to steps_ with condition for empty steps
         // TODO: OR update existing steps_[index]
         // TODO? Fill empty time slots in steps_ (interpolate?)
     }
@@ -119,7 +120,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
     // decide_category uses steps data collected so far to pick a audio category
     private String decide_category(long current_time) {
-        // TODO: Calculate metrics
+        //  Calculate metrics
         //       - distance left (target_dist - k * steps so far)
         int new_step_count = 0;
         if (steps_.length!=0) {
