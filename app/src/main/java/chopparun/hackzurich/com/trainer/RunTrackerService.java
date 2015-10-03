@@ -114,7 +114,7 @@ public class RunTrackerService extends Service {
         Log.i(TAG, "onDestroy called");
         super.onDestroy();
         accelerometer_.onDestroy();
-        location_listener_.onDestroy();
+        //location_listener_.onDestroy();
 
         if (media_player_ != null) {
             media_player_.release();
