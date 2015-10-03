@@ -19,6 +19,8 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import chopparun.hackzurich.com.trainer.utilities._LocationListener;
+
 
 /*
     RunTrackerService is started and stopped by RunningActivity
@@ -99,6 +101,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
     }
 
     private Accelerometer accelerometer_;
+    private _LocationListener location_listener_;
     private Timer timer_ = new Timer();
 
     // Only called when service is started
@@ -110,6 +113,9 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
         // Get accelerometer class instance
         accelerometer_ = new Accelerometer(this);
+
+        // Get _LocationListener
+        location_listener_ = new _LocationListener(this);
 
         // TODO: Make run in foreground
 
@@ -126,8 +132,15 @@ public class RunTrackerService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
         accelerometer_.onDestroy();
+        location_listener_.onDestroy();
 
         sensor_manager_.unregisterListener(this);
+    }
+
+    private float total_dist_ = 0.f;
+    public void updateDistance(float delta) {
+        total_dist_ += delta;
+        Log.i(TAG, "Total distance: " + String.valueOf(total_dist_));
     }
 
     // Main pipeline
@@ -241,7 +254,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
             left_dist = target_dist_;
             if (steps_.size()!=0) {
                 new_step_count = steps_.get(steps_.size()-1);
-                left_dist = target_dist_-new_step_count+steps_.get(0);
+                left_dist = (int)(target_dist_- total_dist_);
             }
 
             //       - avg. velocity needed to reach goal
