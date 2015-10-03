@@ -87,8 +87,6 @@ public class RunTrackerService extends Service implements SensorEventListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Tell activity about state
         Log.d(TAG, "onStartCommand called");
-        target_dist_ = intent.getExtras().getLong(GoalEntry.GOAL_DISTANCE);
-        target_time_ = intent.getExtras().getLong(GoalEntry.GOAL_TIME);
         return START_NOT_STICKY; // If killed, system does not restart the service
     }
 

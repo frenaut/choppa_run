@@ -17,8 +17,6 @@ import chopparun.hackzurich.com.trainer.RunTrackerService.LocalBinder;
 
 public class RunningActivity extends AppCompatActivity {
     private final String TAG = "RunningActivity";
-    private long targetTime;
-    private long targetDistance;
     private TextView TimeElapsed,StepsElapsed;
 
     private String coach_;
@@ -38,9 +36,6 @@ public class RunningActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        targetTime = (long) this.getIntent().getIntExtra(GoalEntry.GOAL_DISTANCE,0)*60000;
-        targetDistance = (long) this.getIntent().getIntExtra(GoalEntry.GOAL_TIME,0);
     }
 
     @Override
