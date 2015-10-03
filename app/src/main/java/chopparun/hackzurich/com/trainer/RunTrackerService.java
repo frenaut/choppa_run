@@ -136,7 +136,6 @@ public class RunTrackerService extends Service implements SensorEventListener {
         sensor_manager_.unregisterListener(this);
 
         if (media_player_ != null) {
-            media_player_.stop();
             media_player_.release();
         }
 
