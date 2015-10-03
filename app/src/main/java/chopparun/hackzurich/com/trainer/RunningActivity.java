@@ -65,7 +65,7 @@ public class RunningActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    stepsElapsed.setText(String.valueOf(service_.getDist()));
+                    stepsElapsed.setText(String.valueOf((int)service_.getDist())+" m");
                     String timeString = GetFormattedInterval(service_.getTime());
                     timeElapsed.setText(timeString);
                 }
