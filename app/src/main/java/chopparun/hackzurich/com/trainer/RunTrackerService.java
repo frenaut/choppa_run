@@ -172,6 +172,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
     private MediaPlayer media_player_ = null;
     private boolean playing_ = false;
+    int previous_track_;
     Random _rand = new Random();
 
     // play_audio plays a random audio file from a category
@@ -191,10 +192,15 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
         // Choose random audio file from list of selected files
         Field field = selected.get(_rand.nextInt(selected.size()));
-        Context context = getApplicationContext();
         if (media_player_ != null) media_player_.release();
+
+        int next_track_;
         try {
-            media_player_ = MediaPlayer.create(context, field.getInt(field));
+            next_track_ = field.getInt(field);
+            if (next_track_ == previous_track_) return;
+
+            Context context = getApplicationContext();
+            media_player_ = MediaPlayer.create(context, next_track_);
             media_player_.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
                     mp.release();
@@ -203,6 +209,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
             });
             media_player_.start();
             playing_ = true;
+            previous_track_ = next_track_;
         } catch (Exception e) {
             Log.e(TAG, "play_audio.MediaPlayer: " + e.toString());
         }
