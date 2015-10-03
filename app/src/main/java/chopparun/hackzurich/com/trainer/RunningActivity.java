@@ -66,10 +66,20 @@ public class RunningActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     stepsElapsed.setText(String.valueOf(service_.getDist()));
-                    timeElapsed.setText(String.valueOf((int)service_.getTime()/1000));
+                    String timeString = GetFormattedInterval(service_.getTime());
+                    timeElapsed.setText(timeString);
                 }
             });
         }
+    }
+
+    public static String GetFormattedInterval(final long ms) {
+        long x = ms / 1000;
+        long seconds = x % 60;
+        x /= 60;
+        long minutes = x ;
+
+        return String.format("%02d:%02d", minutes, seconds);
     }
 
     @Override
