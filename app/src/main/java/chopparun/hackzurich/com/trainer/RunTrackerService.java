@@ -27,7 +27,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
     private String coach_ = "Arnie"; // Current selected coach
 
     /* Steps counting related */
-    ArrayList<Integer> steps_ = new ArrayList<Integer>();// All steps accumulated. New cumulative step counts are appended.
+    ArrayList<Integer> steps_ ;// All steps accumulated. New cumulative step counts are appended.
     private long start_time_;  // Timestamp for value at steps_[0] (in ms, new Date().getTime())
     private int  dtime_ = 500; // ms between each entry in steps_[]
 
@@ -87,7 +87,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
         // TODO: Make run in foreground
         // TODO: Initialize data structures
-        steps_= new int[]{};
+        steps_= new ArrayList<>();
         // TODO: Start audio manager?
     }
 
