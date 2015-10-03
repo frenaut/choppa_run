@@ -23,6 +23,7 @@ public class RunningActivity extends AppCompatActivity {
     private String coach_;
     private long target_time_;
     private long target_dist_;
+    Timer timer = new Timer();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,15 +56,19 @@ public class RunningActivity extends AppCompatActivity {
             Log.d(TAG, "bindService onStart");
             bindService(intent, connection_, Context.BIND_AUTO_CREATE);
         }
-
-        Timer timer = new Timer();
         timer.scheduleAtFixedRate(new UpdateTimeTask(), 500, 1000);
     }
 
     class UpdateTimeTask extends TimerTask {
+        @Override
         public void run() {
-            stepsElapsed.setText(String.valueOf(service_.getDist()));
-            timeElapsed.setText(String.valueOf(service_.getTime()));
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    stepsElapsed.setText(String.valueOf(service_.getDist()));
+                    timeElapsed.setText(String.valueOf((int)service_.getTime()/1000));
+                }
+            });
         }
     }
 

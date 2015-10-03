@@ -50,7 +50,12 @@ public class RunTrackerService extends Service implements SensorEventListener {
     public void setCoach(String coach) { coach_ = coach; }
     public void setTime(long target) { target_time_ = target; }
     public void setDist(long target) { target_dist_ = target; }
-    public long getDist(){return steps_.get(steps_.size()-1);}
+    public long getDist(){
+        if (steps_.isEmpty())
+                return 0;
+        else
+            return steps_.get(steps_.size()-1);
+    }
     public long getTime(){return (new Date().getTime()-start_time_);}
     //----------------------------------------------------------------------------------------------
 
