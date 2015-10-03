@@ -31,9 +31,6 @@ public class GoalEntry extends AppCompatActivity {
     private int curr_Picker = -1; // = R.id.Picker_Arnie;
     private static String coach = "arnie";
 
-    protected static int SCREEN_WIDTH;
-    protected static int IMG_WIDTH, IMG_HEIGHT,LARGE_IMG_WIDTH,LARGE_IMG_HEIGHT;
-
     public LocationManager locationManager;
     public GpsStatus gpsStatus;
 
@@ -48,11 +45,9 @@ public class GoalEntry extends AppCompatActivity {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        SCREEN_WIDTH = size.x;
-        IMG_WIDTH = SCREEN_WIDTH/5;
-        IMG_HEIGHT = SCREEN_WIDTH/5;
+        int screen_width = size.x;
+        int img_width = screen_width / 5;
 
-        Log.i(TAG,""+LARGE_IMG_WIDTH+IMG_WIDTH);
         setContentView(R.layout.activity_goal_entry);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -64,17 +59,17 @@ public class GoalEntry extends AppCompatActivity {
         ImageView arnie = (ImageView) findViewById(R.id.Picker_Arnie);
         Bitmap head_arnie = BitmapFactory.decodeResource(getResources(), R.drawable.arnie_head, options);
         Bitmap head_arnie_drawable = ImageHelper.getRoundedCornerBitmap(head_arnie);
-        arnie.setImageBitmap(Bitmap.createScaledBitmap(head_arnie_drawable, IMG_WIDTH, IMG_WIDTH, false));;
+        arnie.setImageBitmap(Bitmap.createScaledBitmap(head_arnie_drawable, img_width, img_width, false));;
 
         ImageView sammi = (ImageView) findViewById(R.id.Picker_Sammi);
         Bitmap head_sammi = BitmapFactory.decodeResource(getResources(), R.drawable.sammi_head, options);
         Bitmap head_sammi_drawable = ImageHelper.getRoundedCornerBitmap(head_sammi);
-        sammi.setImageBitmap(Bitmap.createScaledBitmap(head_sammi_drawable, IMG_WIDTH, IMG_WIDTH, false));
+        sammi.setImageBitmap(Bitmap.createScaledBitmap(head_sammi_drawable, img_width, img_width, false));
 
         ImageView jacki = (ImageView) findViewById(R.id.Picker_Jacki);
         Bitmap head_jacki = BitmapFactory.decodeResource(getResources(), R.drawable.jackie_head, options);
         Bitmap head_jacki_drawable = ImageHelper.getRoundedCornerBitmap(head_jacki);
-        jacki.setImageBitmap(Bitmap.createScaledBitmap(head_jacki_drawable, IMG_WIDTH, IMG_WIDTH, false));
+        jacki.setImageBitmap(Bitmap.createScaledBitmap(head_jacki_drawable, img_width, img_width, false));
 
         pickTrainer(findViewById(R.id.Picker_Arnie));
     }
@@ -107,6 +102,7 @@ public class GoalEntry extends AppCompatActivity {
                 break;
             case R.id.Picker_Sammi:
                 coach = "samuel";
+                break;
             case R.id.Picker_Jacki:
                 coach = "jackie";
                 break;

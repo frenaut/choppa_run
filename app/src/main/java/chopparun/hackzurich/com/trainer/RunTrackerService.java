@@ -32,7 +32,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
     //----------------------------------------------------------------------------------------------
 
     /* Audio related */
-    private String coach_ = "arnie"; // Current selected coach
+    private String coach_ = "???"; // Current selected coach
 
     /* Steps counting related */
     ArrayList<Integer> steps_ ;// All steps accumulated. New cumulative step counts are appended.
@@ -128,13 +128,21 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
     @Override
     public void onDestroy() {
+        Log.i(TAG, "onDestroy called");
         super.onDestroy();
         accelerometer_.onDestroy();
         location_listener_.onDestroy();
 
         sensor_manager_.unregisterListener(this);
 
+        if (media_player_ != null) {
+            media_player_.stop();
+            media_player_.release();
+        }
+
         timer_.cancel();
+
+        stopSelf();
     }
 
     private float total_dist_ = 0.f;
