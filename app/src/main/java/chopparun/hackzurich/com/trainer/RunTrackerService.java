@@ -1,17 +1,21 @@
 package chopparun.hackzurich.com.trainer;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Path;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.Random;
 
 
 /*
@@ -24,7 +28,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
     //----------------------------------------------------------------------------------------------
 
     /* Audio related */
-    private String coach_ = "Arnie"; // Current selected coach
+    private String coach_ = "arnie"; // Current selected coach
 
     /* Steps counting related */
     ArrayList<Integer> steps_ ;// All steps accumulated. New cumulative step counts are appended.
@@ -102,9 +106,11 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
         updateSteps(current_time, new_step_count);
 
+        if (playing_) return;
+
         category = decide_category(current_time);
 
-        if (!category.isEmpty()) play_audio(category);
+        play_audio(category);
     }
 
     // Update steps_ list
@@ -123,10 +129,39 @@ public class RunTrackerService extends Service implements SensorEventListener {
         steps_.add(new_step_count);
     }
 
+    private boolean playing_ = false;
+    Random _rand = new Random();
+
     // play_audio plays a random audio file from a category
     private void play_audio(String category) {
-        // TODO: Pick audio directory using `coach` and category
-        // TODO: Choose random audio file from directory (For now just have a 01.mp3?)
+        // Get list of available files
+        Field[] fields = R.raw.class.getFields();
+
+        // Select files which match coach and category
+        String prefix = coach_ + "_" + category;
+        ArrayList<Field> selected = new ArrayList<>();
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i].getName().substring(0, prefix.length()).equals(prefix)) {
+                selected.add(fields[i]);
+            }
+        }
+        if (selected.size() == 0) return;
+
+        // Choose random audio file from list of selected files
+        Field field = selected.get(_rand.nextInt(selected.size()));
+        Context context = getApplicationContext();
+        try {
+            MediaPlayer mediaPlayer = MediaPlayer.create(context, field.getInt(field));
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                public void onCompletion(MediaPlayer mp) {
+                    playing_ = false;
+                }
+            });
+            mediaPlayer.start();
+            playing_ = true;
+        } catch (Exception e) {
+            Log.e(TAG, "play_audio.MediaPlayer: " + e.toString());
+        }
     }
 
     // decide_category uses steps data collected so far to pick a audio category
