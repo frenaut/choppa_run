@@ -14,9 +14,9 @@ public class Accelerometer implements SensorEventListener {
     //----------------------------------------------------------------------------------------------
 
     private SensorManager sensor_manager_;
-    private Sensor accelerometer_;
-    private Sensor gravity_;
-    private boolean gravity_ready_ = false;
+    private Sensor acceleration_;
+    private Sensor rotation_;
+    private boolean rotation_ready_ = false;
 
     //----------------------------------------------------------------------------------------------
 
@@ -25,10 +25,8 @@ public class Accelerometer implements SensorEventListener {
     float ay;
     float az;
 
-    // Gravity
-    float gx;
-    float gy;
-    float gz;
+    // Rotation
+    float[] R = new float[9];
 
     //----------------------------------------------------------------------------------------------
 
@@ -38,10 +36,11 @@ public class Accelerometer implements SensorEventListener {
         ctx = context;
         sensor_manager_ = (SensorManager) ctx.getSystemService(Context.SENSOR_SERVICE);
 
-        gravity_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_GRAVITY);
-        sensor_manager_.registerListener(this, gravity_, SensorManager.SENSOR_DELAY_GAME);
+        rotation_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        sensor_manager_.registerListener(this, rotation_, SensorManager.SENSOR_DELAY_FASTEST);
 
-        accelerometer_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        // Gravity removed
+        acceleration_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
     }
 
     @Override
@@ -51,18 +50,56 @@ public class Accelerometer implements SensorEventListener {
 
     @Override
     public final void onSensorChanged(SensorEvent event) {
-        if (event.sensor == gravity_) {
-            gx = event.values[0]; gy = event.values[1]; gz = event.values[2];
-            //Log.d(TAG, "Gra: " + String.valueOf(gx) + ", " + String.valueOf(gy) + ", " + String.valueOf(gz));
-            if (!gravity_ready_) {
-                sensor_manager_.registerListener(this, accelerometer_, SensorManager.SENSOR_DELAY_GAME);
+        if (event.sensor == rotation_) {
+            // R: World to Device
+            SensorManager.getRotationMatrixFromVector(R, event.values);
+
+            if (!rotation_ready_) {
+                sensor_manager_.registerListener(this, acceleration_, SensorManager.SENSOR_DELAY_FASTEST);
+                rotation_ready_ = true;
             }
-        } else if (event.sensor == accelerometer_) {
+        } else if (event.sensor == acceleration_) {
             // The acc sensor returns 3 values
-            ax = event.values[0] - gx;
-            ay = event.values[1] - gy;
-            az = event.values[2] - gz;
+            ax = event.values[0];
+            ay = event.values[1];
+            az = event.values[2];
             //Log.d(TAG, "Acc: " + String.valueOf(ax) + ", " + String.valueOf(ay) + ", " + String.valueOf(az));
+
+            // Multiply acceleration by R.t
+            float nax = R[0]*ax + R[3]*ay + R[6]*az,
+                  nay = R[1]*ax + R[4]*ay + R[7]*az,
+                  naz = R[2]*ax + R[5]*ay + R[8]*az;
+
+            ax = nax; ay = nay; az = naz;
+            //Log.d(TAG, "Fixed acc: " + String.valueOf(nax) + ", " + String.valueOf(nay) + ", " + String.valueOf(naz));
+
+            /*
+            // Find R
+            //     from      [gx, gy, gz]  to   [0, 0, -1]
+            // Let  a = unit([gx, gy, gz]), b = [0, 0, -1]
+            // NOTE: [gx, gy, gz] has to be unit vector
+            // Then v = [-gy, -gx, 0], s = Math.sqrt(gx*gx + gy*gy), k = (1.0f-gz)/(gx2+gy2), c = gz
+            //    v_x   = [0, 0, -gx; 0, 0, gy; gx, -gy, 0]
+            //    v_x^2 = [gx^2, -gxgy, 0; -gxgy, gy^2, 0; 0, 0, gx^2+gy^2]
+            //    k     = (1 - gz) / (gx*gx + gy*gy)
+            // Then... R = [ 1 + k gx^2,     k gxgy,             -gx;
+            //                   k gxgy, 1 + k gy^2,              gy;
+            //                       gx,        -gy, 1 +k(gx^2-gy^2)]
+            // Ref. http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
+            float G = (float)Math.sqrt(gx*gx + gy*gy + gz*gz),
+                  ngx = gx / G, ngy = gy / G, ngz = gz / G;
+            float ngx2 = ngx*ngx, ngy2 = ngy*ngy, k = (1.0f-ngz)/(ngx2+ngy2);
+            float kgx2 = k*ngx2;
+            float R11 =  1 + kgx2, R12 =  k*ngx*ngy, R13 = -ngx,
+                  R21 =       R12, R22 = 1 + k*ngy2, R23 =  ngy,
+                  R31 =       ngx, R32 =       -ngy, R33 = 1 + k*(ngx2-ngy2);
+
+            float n_ax = R11*ax + R12*ay + R13*az,
+                  n_ay = R21*ax + R22*ay + R23*az,
+                  n_az = R31*ax + R32*ay + R33*az;
+            //Log.i(TAG, "norm g: " + String.valueOf(ngx) + ", " + String.valueOf(ngy) + ", " + String.valueOf(ngz));
+            Log.i(TAG, "Fixed acc: " + String.valueOf(n_ax) + ", " + String.valueOf(n_ay) + ", " + String.valueOf(n_az));
+            */
 
             // Do something with this sensor value.
             detectStep();
@@ -77,10 +114,10 @@ public class Accelerometer implements SensorEventListener {
     private int total_steps = 0;
 
     private void detectStep() {
-        float A = (float)Math.sqrt(ax*ax + ay*ay + az*az);
+        float A = (float)Math.sqrt(ax*ax + ay*ay);
         //Log.d(TAG, "Acc: " + String.valueOf(A));
 
-        float min_ = 1;
+        float min_ = 0.5f;
         if (A_2 > A_4 && A_2 > A_3 && A_2 > A_1 && A_2 > A &&
                 (A_2 - A_4) > min_ && (A_2 - A) > min_) {
             if (step_state_) { // On step up
