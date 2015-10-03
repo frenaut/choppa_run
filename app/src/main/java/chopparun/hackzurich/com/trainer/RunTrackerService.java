@@ -223,13 +223,14 @@ public class RunTrackerService extends Service implements SensorEventListener {
         // Associate metrics with category
         // TODO : more categories
         String category="all_good";
-        if (vel_normalized > 120) category="too_fast";
+        if (time_normalized< 80 && vel_normalized > 140) category="too_fast";
         if (vel_normalized < 60) category ="too_slow";
         if (vel_normalized < 40) category="stopping";
-
+        if (time_normalized > 100 && vel_normalized<30) category="finish";
+        if (time_normalized > 80 && vel_normalized>90) category="perfect";
         Log.d(TAG, "Normalized velocity: "+ vel_normalized);
         Log.d(TAG, "Category picked: " + category);
 
-        return category; // TODO: remove
+        return category;
     }
 }
