@@ -90,6 +90,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
         return START_NOT_STICKY; // If killed, system does not restart the service
     }
 
+    private Accelerometer accelerometer_;
     private Timer timer_ = new Timer();
 
     // Only called when service is started
@@ -97,7 +98,10 @@ public class RunTrackerService extends Service implements SensorEventListener {
     public void onCreate() {
         sensor_manager_ = (SensorManager)getSystemService(SENSOR_SERVICE);
         step_counter_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        sensor_manager_.registerListener(this, step_counter_, SensorManager.SENSOR_DELAY_FASTEST);
+        //sensor_manager_.registerListener(this, step_counter_, SensorManager.SENSOR_DELAY_FASTEST);
+
+        // Get accelerometer class instance
+        accelerometer_ = new Accelerometer(this);
 
         // TODO: Make run in foreground
 
@@ -155,7 +159,8 @@ public class RunTrackerService extends Service implements SensorEventListener {
         }
 
         // Append new cumulative step count to steps_ with condition for empty steps
-        steps_.add(new_step_count);
+        if (index + 1 == steps_.size()) steps_.set(index, new_step_count);
+        else steps_.add(new_step_count);
     }
 
     private MediaPlayer media_player_ = null;
