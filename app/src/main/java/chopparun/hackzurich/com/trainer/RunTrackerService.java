@@ -86,7 +86,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
         sensor_manager_.registerListener(this, step_counter_, SensorManager.SENSOR_DELAY_GAME);
 
         // TODO: Make run in foreground
-        // TODO: Initialize data structures
+        // Initialize data structures
         steps_= new ArrayList<>();
         // TODO: Start audio manager?
     }
@@ -107,10 +107,15 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
     // Update steps_ list
     private void updateSteps(long current_time, int new_step_count) {
-        // TODO: Calculate index for current_time
-        // TODO: Append new cumulative step count to steps_ with condition for empty steps
-        // TODO: OR update existing steps_[index]
-        // TODO? Fill empty time slots in steps_ (interpolate?)
+        // Calculate index for current_time
+        int index = (int)((current_time - start_time_)/dtime_); // this is ugly...
+        // Fill empty time slots in steps_
+        int last_step_count = steps_.get(steps_.size()-1);
+        for (int i=0;i<index;i++) {
+            steps_.add(i,last_step_count);
+        }
+        // Append new cumulative step count to steps_ with condition for empty steps
+        steps_.add(index,new_step_count);
     }
 
     // play_audio plays a random audio file from a category
@@ -138,15 +143,15 @@ public class RunTrackerService extends Service implements SensorEventListener {
         }
         //       - current acceleration (over past 10s) - Need to store velocities
         //       - time left
-        int passed_time = (int)(start_time_-current_time);
-        int left_time = passed_time+target_time_;
+        int elapsed_time = (int)(current_time-start_time_);
+        int left_time = target_time_-elapsed_time;
         //       - avg. velocity needed to reach goal
         double target_vel = left_dist / (left_time*1e3); // in m/s
 
 
         // Normalize metrics by target, in percent (acc does not need to be normalized)
         int vel_normalized = (int)(100*vel/target_vel);
-        int time_normalized = (int)(100*(passed_time)/(target_time_));
+        int time_normalized = (int)(100*(elapsed_time)/(target_time_));
 
         // TODO: Associate metrics with category
 
