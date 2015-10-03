@@ -137,12 +137,15 @@ public class RunTrackerService extends Service implements SensorEventListener {
         }
         //       - current acceleration (over past 10s) - Need to store velocities
         //       - time left
-        int left_time = (int)(start_time_-current_time)+target_time_;
+        int passed_time = (int)(start_time_-current_time);
+        int left_time = passed_time+target_time_;
         //       - avg. velocity needed to reach goal
-        double target_vel = left_dist / (left_time*1e3);
+        double target_vel = left_dist / (left_time*1e3); // in m/s
 
 
-        // TODO: Normalize metrics by target
+        // Normalize metrics by target, in percent (acc does not need to be normalized)
+        int vel_normalized = (int)(100*vel/target_vel);
+        int time_normalized = (int)(100*(passed_time)/(target_time_));
 
         // TODO: Associate metrics with category
 
