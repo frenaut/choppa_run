@@ -16,6 +16,8 @@ import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /*
@@ -82,6 +84,8 @@ public class RunTrackerService extends Service implements SensorEventListener {
         return START_NOT_STICKY; // If killed, system does not restart the service
     }
 
+    private Timer timer_ = new Timer();
+
     // Only called when service is started
     @Override
     public void onCreate() {
@@ -94,7 +98,11 @@ public class RunTrackerService extends Service implements SensorEventListener {
         steps_= new ArrayList<>();
         start_time_ = new Date().getTime();
 
-        // TODO: Start audio manager?
+        timer_.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                check();
+            }
+        }, new Date(), 500);
     }
 
     // Main pipeline
@@ -102,19 +110,33 @@ public class RunTrackerService extends Service implements SensorEventListener {
         Log.d(TAG, "new_step_count = " + String.valueOf(new_step_count));
 
         long current_time = new Date().getTime();
-        String category;
+        addSteps(current_time, new_step_count);
+    }
 
-        updateSteps(current_time, new_step_count);
-
+    public void check() {
         if (playing_) return;
 
-        category = decide_category(current_time);
-
+        long current_time = new Date().getTime();
+        updateSteps(current_time);
+        String category = decide_category(current_time);
         play_audio(category);
     }
 
     // Update steps_ list
-    private void updateSteps(long current_time, int new_step_count) {
+    private void updateSteps(long current_time) {
+        // Calculate index for current_time
+        int index = (int)((current_time - start_time_)/dtime_); // this is ugly...
+
+        // Fill empty time slots in steps_
+        if (steps_.size() > 0) {
+            int last_step_count = steps_.get(steps_.size()-1);
+            for (int i = (steps_.size() - 1); i < index; i++) {
+                steps_.add(last_step_count);
+            }
+        }
+    }
+
+    private void addSteps(long current_time, int new_step_count) {
         // Calculate index for current_time
         int index = (int)((current_time - start_time_)/dtime_); // this is ugly...
 
@@ -125,6 +147,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
                 steps_.add(last_step_count);
             }
         }
+
         // Append new cumulative step count to steps_ with condition for empty steps
         steps_.add(new_step_count);
     }
@@ -200,9 +223,9 @@ public class RunTrackerService extends Service implements SensorEventListener {
         // Associate metrics with category
         // TODO : more categories
         String category="all_good";
-        if (vel_normalized < 5) category="stopping";
         if (vel_normalized > 120) category="too_fast";
-        if (vel_normalized < 80) category ="too_slow";
+        if (vel_normalized < 60) category ="too_slow";
+        if (vel_normalized < 40) category="stopping";
 
         Log.d(TAG, "Normalized velocity: "+ vel_normalized);
         Log.d(TAG, "Category picked: " + category);
