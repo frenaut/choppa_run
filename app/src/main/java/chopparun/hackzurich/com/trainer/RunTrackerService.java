@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import java.util.Date;
+import java.util.ArrayList;
 
 
 /*
@@ -26,7 +27,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
     private String coach_ = "Arnie"; // Current selected coach
 
     /* Steps counting related */
-    private int  steps_[];     // All steps accumulated. New cumulative step counts are appended.
+    ArrayList<Integer> steps_ = new ArrayList<Integer>();// All steps accumulated. New cumulative step counts are appended.
     private long start_time_;  // Timestamp for value at steps_[0] (in ms, new Date().getTime())
     private int  dtime_ = 500; // ms between each entry in steps_[]
 
@@ -123,16 +124,16 @@ public class RunTrackerService extends Service implements SensorEventListener {
         //  Calculate metrics
         //       - distance left (target_dist - k * steps so far)
         int new_step_count = 0;
-        if (steps_.length!=0) {
-            new_step_count = steps_[steps_.length-1];
+        if (steps_.size()!=0) {
+            new_step_count = steps_.get(steps_.size()-1);
         }
         int left_dist = target_dist_-new_step_count;
 
         //       - current velocity (over past 10s)
         double vel = 0;
-        if (steps_.length>21)   {
+        if (steps_.size()>21)   {
             // at 500ms per entry, 10s corresponds to 20 entries ago
-            vel = new_step_count - steps_[steps_.length-21];
+            vel = new_step_count - steps_.get(steps_.size()-21);
             vel = vel/10; // in m/s
         }
         //       - current acceleration (over past 10s) - Need to store velocities
