@@ -60,12 +60,16 @@
                 android:id="@+id/Picker_Jacki"
                 android:onClick="pickTrainer" />
 
-            <!--<ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/Picker_3"
-                android:onClick="pickTrainer"
-                />-->
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginLeft="-3dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="-3dp"
+                android:gravity="center"
+                android:id="@+id/Picker_Star"
+                android:onClick="pickTrainer" />
 
         </LinearLayout>
 

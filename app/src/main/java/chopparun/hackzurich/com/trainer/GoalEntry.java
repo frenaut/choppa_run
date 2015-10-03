@@ -59,7 +59,7 @@ public class GoalEntry extends AppCompatActivity {
         ImageView arnie = (ImageView) findViewById(R.id.Picker_Arnie);
         Bitmap head_arnie = BitmapFactory.decodeResource(getResources(), R.drawable.arnie_head, options);
         Bitmap head_arnie_drawable = ImageHelper.getRoundedCornerBitmap(head_arnie);
-        arnie.setImageBitmap(Bitmap.createScaledBitmap(head_arnie_drawable, img_width, img_width, false));;
+        arnie.setImageBitmap(Bitmap.createScaledBitmap(head_arnie_drawable, img_width, img_width, false));
 
         ImageView sammi = (ImageView) findViewById(R.id.Picker_Sammi);
         Bitmap head_sammi = BitmapFactory.decodeResource(getResources(), R.drawable.sammi_head, options);
@@ -70,6 +70,12 @@ public class GoalEntry extends AppCompatActivity {
         Bitmap head_jacki = BitmapFactory.decodeResource(getResources(), R.drawable.jackie_head, options);
         Bitmap head_jacki_drawable = ImageHelper.getRoundedCornerBitmap(head_jacki);
         jacki.setImageBitmap(Bitmap.createScaledBitmap(head_jacki_drawable, img_width, img_width, false));
+
+        ImageView star = (ImageView) findViewById(R.id.Picker_Star);
+        Bitmap head_star = BitmapFactory.decodeResource(getResources(), R.drawable.star_wars, options);
+        Bitmap head_star_drawable = ImageHelper.getRoundedCornerBitmap(head_star);
+        star.setImageBitmap(Bitmap.createScaledBitmap(head_star_drawable, img_width, img_width, false));
+
 
         pickTrainer(findViewById(R.id.Picker_Arnie));
     }
@@ -106,6 +112,10 @@ public class GoalEntry extends AppCompatActivity {
             case R.id.Picker_Jacki:
                 coach = "jackie";
                 break;
+            case R.id.Picker_Star:
+                coach = "star_wars";
+                break;
+
         }
         // enlarge selected picker
         float scaleUp = 1.4f;
