@@ -7,16 +7,18 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
+import android.widget.TextView;
+
 import chopparun.hackzurich.com.trainer.RunTrackerService.LocalBinder;
 
 public class RunningActivity extends AppCompatActivity {
     private final String TAG = "RunningActivity";
+    private long targetTime;
+    private long targetDistance;
+    private TextView TimeElapsed,StepsElapsed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +27,9 @@ public class RunningActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        targetTime = (long) this.getIntent().getIntExtra(GoalEntry.GOAL_DISTANCE,0)*60000;
+        targetDistance = (long) this.getIntent().getIntExtra(GoalEntry.GOAL_TIME,0);
     }
 
     @Override
@@ -34,6 +39,11 @@ public class RunningActivity extends AppCompatActivity {
         // Start RunTrackerService if not started
         Intent intent = new Intent(this, RunTrackerService.class);
         Log.d(TAG, "Calling bindService");
+        Bundle mBundle = new Bundle();
+        mBundle.putLong(GoalEntry.GOAL_DISTANCE,targetDistance);
+        mBundle.putLong(GoalEntry.GOAL_TIME,targetTime);
+        intent.putExtras(mBundle);
+
         startService(intent);
         bindService(intent, connection_, Context.BIND_AUTO_CREATE);
     }

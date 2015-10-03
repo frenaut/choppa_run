@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 import chopparun.hackzurich.com.trainer.utilities.ImageHelper;
 
@@ -25,9 +24,9 @@ public class GoalEntry extends AppCompatActivity {
 
     private static final String TAG = "GoalEntry";
 
-    private final static String GOAL_TIME = "com.chopparun.GOAL_TIME";
-    private final static String GOAL_DISTANCE = "com.chopparun.GOAL_DIST";
-    private final static String TRAINER = "com.chopparun.TRAINER";
+    public final static String GOAL_TIME = "com.chopparun.GOAL_TIME";
+    public final static String GOAL_DISTANCE = "com.chopparun.GOAL_DIST";
+    public final static String TRAINER = "com.chopparun.TRAINER";
 
     private int curr_Picker = -1; // = R.id.Picker_Arnie;
     private static String coach = "arnie";

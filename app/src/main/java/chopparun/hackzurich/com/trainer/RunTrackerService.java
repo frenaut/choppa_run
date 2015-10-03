@@ -36,13 +36,14 @@ public class RunTrackerService extends Service implements SensorEventListener {
     ArrayList<Integer> steps_ ;// All steps accumulated. New cumulative step counts are appended.
     private long start_time_;  // Timestamp for value at steps_[0] (in ms, new Date().getTime())
     private long dtime_ = 500; // ms between each entry in steps_[]
+    private static final long interval_ = 5000; // window width (ms)
 
     /*
         Personalization related
         - Take onCreate from RunningActivity (input in GoalEntry)
      */
-    private int target_time_ = 600000; // in ms     (TODO: retrieve from activity)
-    private int target_dist_ = 1000;   // in meters (TODO: retrieve from activity)
+    private long target_time_ = 600000; // in ms
+    private long target_dist_ = 1000;   // in meters
 
     //----------------------------------------------------------------------------------------------
 
@@ -80,7 +81,8 @@ public class RunTrackerService extends Service implements SensorEventListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Tell activity about state
         Log.d(TAG, "onStartCommand called");
-
+        target_dist_ = intent.getExtras().getLong(GoalEntry.GOAL_DISTANCE);
+        target_time_ = intent.getExtras().getLong(GoalEntry.GOAL_TIME);
         return START_NOT_STICKY; // If killed, system does not restart the service
     }
 
@@ -190,44 +192,54 @@ public class RunTrackerService extends Service implements SensorEventListener {
     // decide_category uses steps data collected so far to pick a audio category
     private String decide_category(long current_time) {
         //  Calculate metrics
+        long left_time = 0 ,left_dist = 0;
+        double target_vel = 0.0;
+        int time_normalized, vel_normalized;
+
         //       - distance left (target_dist - k * steps so far)
         int new_step_count = 0;
-        int left_dist = target_dist_;
-        if (steps_.size()!=0) {
-            new_step_count = steps_.get(steps_.size()-1);
-            left_dist = target_dist_-new_step_count+steps_.get(0);
-        }
-
-
-        //       - current velocity (over past 10s)
-        float vel = 0;
-        if (steps_.size()>21)   {
-            // at 500ms per entry, 10s corresponds to 20 entries ago
-            vel = (float)(new_step_count - steps_.get(steps_.size()-21));
-            vel = vel/10; // in m/s
-            Log.d(TAG, "Step count 10s ago: "+ steps_.get(steps_.size()-21));
-        }
-
-        //       - current acceleration (over past 10s) - Need to store velocities
         //       - time left
-        int elapsed_time = (int)(current_time-start_time_);
-        int left_time = target_time_-elapsed_time;
-        //       - avg. velocity needed to reach goal
-        double target_vel = left_dist*1e3 / left_time; // in m/s
+        long elapsed_time = current_time-start_time_;
+        if (target_time_>0){
+            left_time = target_time_-elapsed_time;
+        }
+        if (target_dist_>0){
+            left_dist = target_dist_;
+            if (steps_.size()!=0) {
+                new_step_count = steps_.get(steps_.size()-1);
+                left_dist = target_dist_-new_step_count+steps_.get(0);
+            }
+
+            //       - avg. velocity needed to reach goal
+            target_vel = left_dist*1e3 / left_time; // in m/s
+        }
+
+
+        //       - current velocity (over past interval s)
+        float vel = 0;
+        int steps_back =  (int) (interval_/dtime_);
+        if (steps_.size()> steps_back+1)   {
+            // at 500ms per entry, 10s corresponds to 20 entries ago
+            vel = (float)(new_step_count - steps_.get(steps_.size()-steps_back));
+            vel = vel/(interval_/1000); // in steps/s
+            Log.d(TAG, "Step count " + interval_+ "s ago: "+ steps_.get(steps_.size()-steps_back));
+        }
+
+        //      - current acceleration (over past 10s) - Need to store velocities
 
 
         // Normalize metrics by target, in percent (acc does not need to be normalized)
-        int vel_normalized = (int)(100*vel/target_vel);
-        int time_normalized = (int)(100*(elapsed_time)/(target_time_));
+        vel_normalized = (int) (target_vel == 0? 0: (100*vel/target_vel));
+        time_normalized = (int) (target_time_ == 0? 0: (100*elapsed_time/target_time_));
 
         // Associate metrics with category
         // TODO : more categories
         String category="all_good";
-        if (time_normalized< 80 && vel_normalized > 140) category="too_fast";
-        if (vel_normalized < 60) category ="too_slow";
-        if (vel_normalized < 40) category="stopping";
-        if (time_normalized > 100 && vel_normalized<30) category="finish";
+        if (time_normalized >0 && time_normalized< 80 && vel_normalized > 140) category="too_fast";
+        if (vel_normalized < 60 && vel_normalized > 0) category ="too_slow";
+        if (vel_normalized < 40 && vel_normalized > 0) category="stopping";
         if (time_normalized > 80 && vel_normalized>90) category="perfect";
+        if (time_normalized > 100 && vel_normalized<30) category="finish";
         Log.d(TAG, "Normalized velocity: "+ vel_normalized);
         Log.d(TAG, "Category picked: " + category);
 
