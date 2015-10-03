@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import java.util.Date;
+import java.util.ArrayList;
 
 
 /*
@@ -26,16 +27,16 @@ public class RunTrackerService extends Service implements SensorEventListener {
     private String coach_ = "Arnie"; // Current selected coach
 
     /* Steps counting related */
-    private int  steps_[];     // All steps accumulated. New cumulative step counts are appended.
+    ArrayList<Integer> steps_ ;// All steps accumulated. New cumulative step counts are appended.
     private long start_time_;  // Timestamp for value at steps_[0] (in ms, new Date().getTime())
-    private int  dtime_ = 500; // ms between each entry in steps_[]
+    private long dtime_ = 500; // ms between each entry in steps_[]
 
     /*
         Personalization related
         - Take onCreate from RunningActivity (input in GoalEntry)
      */
-    private int target_time_; // in seconds
-    private int target_dist_; // in meters
+    private int target_time_ = 600000; // in ms     (TODO: retrieve from activity)
+    private int target_dist_ = 1000;   // in meters (TODO: retrieve from activity)
 
     //----------------------------------------------------------------------------------------------
 
@@ -82,10 +83,13 @@ public class RunTrackerService extends Service implements SensorEventListener {
     public void onCreate() {
         sensor_manager_ = (SensorManager)getSystemService(SENSOR_SERVICE);
         step_counter_ = sensor_manager_.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        sensor_manager_.registerListener(this, step_counter_, SensorManager.SENSOR_DELAY_GAME);
+        sensor_manager_.registerListener(this, step_counter_, SensorManager.SENSOR_DELAY_FASTEST);
 
         // TODO: Make run in foreground
-        // TODO: Initialize data structures
+
+        steps_= new ArrayList<>();
+        start_time_ = new Date().getTime();
+
         // TODO: Start audio manager?
     }
 
@@ -96,7 +100,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
         long current_time = new Date().getTime();
         String category;
 
-        updateSteps_(current_time, new_step_count);
+        updateSteps(current_time, new_step_count);
 
         category = decide_category(current_time);
 
@@ -104,11 +108,17 @@ public class RunTrackerService extends Service implements SensorEventListener {
     }
 
     // Update steps_ list
-    private void updateSteps_(long current_time, int new_step_count) {
-        // TODO: Calculate index for current_time
-        // TODO: Append new cumulative step count to steps_
-        // TODO: OR update existing steps_[index]
-        // TODO? Fill empty time slots in steps_ (interpolate?)
+    private void updateSteps(long current_time, int new_step_count) {
+        // Calculate index for current_time
+        int index = (int)((current_time - start_time_)/dtime_); // this is ugly...
+
+        // Fill empty time slots in steps_
+        int last_step_count = steps_.size() == 0 ? new_step_count : steps_.get(steps_.size()-1);
+        for (int i=0;i<index;i++) {
+            steps_.add(i,last_step_count);
+        }
+        // Append new cumulative step count to steps_ with condition for empty steps
+        steps_.add(index,new_step_count);
     }
 
     // play_audio plays a random audio file from a category
@@ -119,32 +129,42 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
     // decide_category uses steps data collected so far to pick a audio category
     private String decide_category(long current_time) {
-        // TODO: Calculate metrics
+        //  Calculate metrics
         //       - distance left (target_dist - k * steps so far)
         int new_step_count = 0;
-        if (steps_.length!=0) {
-            new_step_count = steps_[steps_.length-1];
+        if (steps_.size()!=0) {
+            new_step_count = steps_.get(steps_.size()-1);
         }
         int left_dist = target_dist_-new_step_count;
 
         //       - current velocity (over past 10s)
         double vel = 0;
-        if (steps_.length>21)   {
+        if (steps_.size()>21)   {
             // at 500ms per entry, 10s corresponds to 20 entries ago
-            vel = new_step_count - steps_[steps_.length-21];
+            vel = new_step_count - steps_.get(steps_.size()-21);
             vel = vel/10; // in m/s
         }
         //       - current acceleration (over past 10s) - Need to store velocities
         //       - time left
-        int left_time = (int)(start_time_-current_time)+target_time_;
+        int elapsed_time = (int)(current_time-start_time_);
+        int left_time = target_time_-elapsed_time;
         //       - avg. velocity needed to reach goal
-        double target_vel = left_dist / (left_time*1e3);
+        double target_vel = left_dist / (left_time*1e3); // in m/s
 
 
-        // TODO: Normalize metrics by target
+        // Normalize metrics by target, in percent (acc does not need to be normalized)
+        int vel_normalized = (int)(100*vel/target_vel);
+        int time_normalized = (int)(100*(elapsed_time)/(target_time_));
 
-        // TODO: Associate metrics with category
+        // Associate metrics with category
+        // TODO : more categories
+        String category="all_good";
+        if (vel_normalized < 5) category="stopping";
+        if (vel_normalized > 120) category="too_fast";
+        if (vel_normalized < 80) category ="too_slow";
 
-        return "Category"; // TODO: remove
+        Log.d(TAG, "Category picked: " + category);
+
+        return category; // TODO: remove
     }
 }
