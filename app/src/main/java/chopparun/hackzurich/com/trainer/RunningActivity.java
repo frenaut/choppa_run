@@ -1,7 +1,5 @@
 package chopparun.hackzurich.com.trainer;
 
-import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -46,8 +44,8 @@ public class RunningActivity extends AppCompatActivity {
         Intent intent = new Intent(this, RunTrackerService.class);
         Log.d(TAG, "Calling bindService");
         Bundle mBundle = new Bundle();
-        mBundle.putLong(GoalEntry.GOAL_DISTANCE,targetDistance);
-        mBundle.putLong(GoalEntry.GOAL_TIME,targetTime);
+        mBundle.putLong(GoalEntry.GOAL_DISTANCE,target_time_);
+        mBundle.putLong(GoalEntry.GOAL_TIME, target_time_);
         intent.putExtras(mBundle);
 
         startService(intent);
