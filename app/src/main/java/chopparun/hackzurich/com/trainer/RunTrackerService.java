@@ -128,10 +128,13 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         accelerometer_.onDestroy();
         location_listener_.onDestroy();
 
         sensor_manager_.unregisterListener(this);
+
+        timer_.cancel();
     }
 
     private float total_dist_ = 0.f;
