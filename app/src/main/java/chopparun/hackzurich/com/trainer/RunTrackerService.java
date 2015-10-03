@@ -115,6 +115,13 @@ public class RunTrackerService extends Service implements SensorEventListener {
         }, new Date(), 500);
     }
 
+    @Override
+    public void onDestroy() {
+        accelerometer_.onDestroy();
+
+        sensor_manager_.unregisterListener(this);
+    }
+
     // Main pipeline
     public void onStepCount(int new_step_count) {
         Log.d(TAG, "new_step_count = " + String.valueOf(new_step_count));
