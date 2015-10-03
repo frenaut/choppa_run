@@ -114,11 +114,13 @@ public class RunTrackerService extends Service implements SensorEventListener {
 
         // Fill empty time slots in steps_
         int last_step_count = steps_.size() == 0 ? new_step_count : steps_.get(steps_.size()-1);
-        for (int i=0;i<index;i++) {
-            steps_.add(i,last_step_count);
+        if (steps_.size()>0) {
+            for (int i = (steps_.size() - 1); i < index; i++) {
+                steps_.add(last_step_count);
+            }
         }
         // Append new cumulative step count to steps_ with condition for empty steps
-        steps_.add(index,new_step_count);
+        steps_.add(new_step_count);
     }
 
     // play_audio plays a random audio file from a category
@@ -132,24 +134,28 @@ public class RunTrackerService extends Service implements SensorEventListener {
         //  Calculate metrics
         //       - distance left (target_dist - k * steps so far)
         int new_step_count = 0;
+        int left_dist = target_dist_;
         if (steps_.size()!=0) {
             new_step_count = steps_.get(steps_.size()-1);
+            left_dist = target_dist_-new_step_count+steps_.get(0);
         }
-        int left_dist = target_dist_-new_step_count;
+
 
         //       - current velocity (over past 10s)
-        double vel = 0;
+        float vel = 0;
         if (steps_.size()>21)   {
             // at 500ms per entry, 10s corresponds to 20 entries ago
-            vel = new_step_count - steps_.get(steps_.size()-21);
+            vel = (float)(new_step_count - steps_.get(steps_.size()-21));
             vel = vel/10; // in m/s
+            Log.d(TAG, "Step count 10s ago: "+ steps_.get(steps_.size()-21));
         }
+
         //       - current acceleration (over past 10s) - Need to store velocities
         //       - time left
         int elapsed_time = (int)(current_time-start_time_);
         int left_time = target_time_-elapsed_time;
         //       - avg. velocity needed to reach goal
-        double target_vel = left_dist / (left_time*1e3); // in m/s
+        double target_vel = left_dist*1e3 / left_time; // in m/s
 
 
         // Normalize metrics by target, in percent (acc does not need to be normalized)
@@ -163,6 +169,7 @@ public class RunTrackerService extends Service implements SensorEventListener {
         if (vel_normalized > 120) category="too_fast";
         if (vel_normalized < 80) category ="too_slow";
 
+        Log.d(TAG, "Normalized velocity: "+ vel_normalized);
         Log.d(TAG, "Category picked: " + category);
 
         return category; // TODO: remove
