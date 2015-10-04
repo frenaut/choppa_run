@@ -118,9 +118,7 @@ public class RunTrackerService extends Service {
         accelerometer_.onDestroy();
         //location_listener_.onDestroy();
 
-        if (media_player_ != null) {
-            media_player_.release();
-        }
+        play_audio("exit");
 
         timer_.cancel();
 
