@@ -278,11 +278,11 @@ public class RunTrackerService extends Service {
         time_normalized = (int) (target_time_ == 0? 0: (100*elapsed_time/target_time_));
 
         // Flags to help understand metrics
-        boolean speed_stopped = vel_normalized < 26;
-        boolean speed_slow    = vel_normalized > 25 && vel_normalized < 86;
-        boolean speed_good    = vel_normalized > 85 && vel_normalized < 111;
-        boolean speed_fast    = vel_normalized > 110 && vel_normalized < 131;
-        boolean speed_toofast = vel_normalized > 130;
+        boolean speed_stopped = vel_normalized < 16;
+        boolean speed_slow    = vel_normalized > 15 && vel_normalized < 96;
+        boolean speed_good    = vel_normalized > 95 && vel_normalized < 121;
+        boolean speed_fast    = vel_normalized > 120 && vel_normalized < 151;
+        boolean speed_toofast = vel_normalized > 150;
 
         boolean time_start  = time_normalized < 31;
         boolean time_middle = time_normalized > 30 && time_normalized < 81;
