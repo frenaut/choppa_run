@@ -120,7 +120,7 @@ public class Accelerometer implements SensorEventListener {
                   dA = A_5 - min_A;
 
             // Calculate threshold
-            float min_dA = A_5 * 0.5f;
+            float min_dA = A_5 * 0.3f;
             if (A > 5.0f && min_dA > 1.0f && dA > min_dA) {
                 total_steps += 1;
                 ctx.onStepCount(total_steps);

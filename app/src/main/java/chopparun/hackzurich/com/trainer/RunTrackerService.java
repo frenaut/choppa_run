@@ -102,11 +102,13 @@ public class RunTrackerService extends Service {
         steps_= new ArrayList<>();
         start_time_ = new Date().getTime();
 
+        /*
         timer_.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 check();
             }
         }, new Date(), 3000);
+        */
     }
 
     @Override
@@ -139,6 +141,8 @@ public class RunTrackerService extends Service {
         addSteps(current_time, new_step_count);
 
         total_dist_ += 1;//0.65;
+
+        check();
     }
 
     public void check() {
@@ -234,12 +238,14 @@ public class RunTrackerService extends Service {
         int time_normalized, vel_normalized;
 
         //       - distance left (target_dist - k * steps so far)
-        int new_step_count = 0;
+        final int steps_n = steps_.size();
+        int new_step_count = steps_n > 0 ? steps_.get(steps_n - 1) : 0;
         //       - time left
         long elapsed_time = current_time-start_time_;
         if (target_time_>0){
             left_time = target_time_-elapsed_time;
         }
+        /*
         if (target_dist_>0){
             left_dist = target_dist_;
             if (steps_.size()!=0) {
@@ -251,6 +257,8 @@ public class RunTrackerService extends Service {
             target_vel = left_time > 0 ?
                     left_dist*1e3 / left_time : target_dist_ * 1e3 / target_time_; // in m/s
         }
+        */
+        target_vel = target_dist_ * 1000 / target_time_;
 
 
         //       - current velocity (over past interval s)
@@ -262,6 +270,7 @@ public class RunTrackerService extends Service {
             vel = vel/(interval_/1000); // in steps/s
             Log.d(TAG, "Step count " + interval_+ "s ago: "+ steps_.get(steps_.size()-steps_back));
         }
+        Log.d(TAG, "target_vel: " + String.valueOf(target_vel) + ", vel: " + String.valueOf(vel));
 
         //      - current acceleration (over past 10s) - Need to store velocities
 
