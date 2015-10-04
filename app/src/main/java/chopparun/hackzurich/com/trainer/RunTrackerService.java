@@ -186,7 +186,7 @@ public class RunTrackerService extends Service {
     Random _rand = new Random();
 
     // play_audio plays a random audio file from a category
-    private void play_audio(String category) {
+    public void play_audio(String category) {
         // Put delay if playing for same category
         long current_time = new Date().getTime();
         if (category.equals(previous_category_)) {

@@ -124,6 +124,8 @@ public class RunningActivity extends AppCompatActivity {
                 "/" + target_time_);
             bound_ = true;
             Log.d(TAG, "Bound to RunTrackerService");
+
+            service_.play_audio("start");
         }
 
         @Override
