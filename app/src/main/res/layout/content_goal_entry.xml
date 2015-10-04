@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:ems="10"
-                android:text="300"
+                android:text="150"
                 android:id="@+id/goal_distance_input"
                 />
             <TextView

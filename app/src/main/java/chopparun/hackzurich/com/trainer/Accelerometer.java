@@ -112,15 +112,15 @@ public class Accelerometer implements SensorEventListener {
         prev_A = A;*/
         //Log.d(TAG, "Acc: " + new Date().getTime() + " " + String.valueOf(A));
 
-        if (A_5 > A_6 && A_5 > A_4 &&
-            A_5 > A_3 && A_5 > A_1) {
+        if (A_3 > A_6 && A_3 > A_5 && A_3 > A_4 &&
+            A_3 > A_2 && A_3 > A_1 && A_3 > A) {
             // Found maximum, now found distance from smallest to maximum
             float min_A = Math.min(A_6, Math.min(A_5, Math.min(A_4, Math.min(A_2, Math.min(A_1, A))))),
                   dA = A_3 - min_A;
 
             // Calculate threshold
-            float min_dA = A_3 * 0.2f;
-            if (A > 5.0f && min_dA > 0.5f && dA > min_dA) {
+            float min_dA = A_3 * 0.5f;
+            if (A > 4.0f && min_dA > 1.0f && dA > min_dA) {
                 total_steps += 1;
                 ctx.onStepCount(total_steps);
             }

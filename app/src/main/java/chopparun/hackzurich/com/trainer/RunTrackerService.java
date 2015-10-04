@@ -38,7 +38,7 @@ public class RunTrackerService extends Service {
     ArrayList<Integer> steps_ ;// All steps accumulated. New cumulative step counts are appended.
     private long start_time_;  // Timestamp for value at steps_[0] (in ms, new Date().getTime())
     private long dtime_ = 500; // ms between each entry in steps_[]
-    private static final long interval_ = 5000; // window width (ms)
+    private static final long interval_ = 3000; // window width (ms)
 
     /*
         Personalization related
@@ -181,10 +181,21 @@ public class RunTrackerService extends Service {
     private MediaPlayer media_player_ = null;
     private boolean playing_ = false;
     int previous_track_;
+    String previous_category_;
+    long previous_time_;
     Random _rand = new Random();
 
     // play_audio plays a random audio file from a category
     private void play_audio(String category) {
+        // Put delay if playing for same category
+        long current_time = new Date().getTime();
+        if (category.equals(previous_category_)) {
+            if ((current_time - previous_time_) < 3500) return;
+        } else {
+            if ((current_time - previous_time_) < 1500) return;
+        }
+
+
         // Get list of available files
         Field[] fields = R.raw.class.getFields();
 
@@ -213,11 +224,13 @@ public class RunTrackerService extends Service {
                 public void onCompletion(MediaPlayer mp) {
                     mp.release();
                     playing_ = false;
+                    previous_time_ = new Date().getTime();
                 }
             });
             media_player_.start();
             playing_ = true;
             previous_track_ = next_track_;
+            previous_category_ = category;
         } catch (Exception e) {
             Log.e(TAG, "play_audio.MediaPlayer: " + e.toString());
         }
@@ -257,7 +270,7 @@ public class RunTrackerService extends Service {
         //       - current velocity (over past interval s)
         float vel = 0;
         int steps_back =  (int) (interval_/dtime_);
-        if (steps_.size()> steps_back+1)   {
+        if (steps_n > steps_back+1)   {
             // at 500ms per entry, 10s corresponds to 20 entries ago
             vel = (float)(new_step_count - steps_.get(steps_.size()-steps_back-1));
             vel = vel/(interval_/1000); // in steps/s
