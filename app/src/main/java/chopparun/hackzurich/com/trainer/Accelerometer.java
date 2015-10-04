@@ -73,6 +73,11 @@ public class Accelerometer implements SensorEventListener {
             nz = event.values[2] - gz;
 
             // Try to smooth
+           // final float alpha = 0.8f;
+            //ax = alpha * ax + (1 - alpha) * event.values[0];
+            //ay = alpha * ay + (1 - alpha) * event.values[1];
+            //az = alpha * az + (1 - alpha) * event.values[2];
+
             ax = 0.25f * px + 0.5f * ax + 0.25f * nx;
             ay = 0.25f * py + 0.5f * ay + 0.25f * ny;
             az = 0.25f * pz + 0.5f * az + 0.25f * nz;
@@ -86,30 +91,21 @@ public class Accelerometer implements SensorEventListener {
     private float A_8 = 0, A_7 = 0, A_6 = 0, A_5 = 0, A_4 = 0, A_3 = 0, A_2 = 0, A_1 = 0; // magnitude of acc 4,3,2,1 reading prior
 
     private int total_steps = 0;
-    private float prev_max = 0.0f;
-    private long last_step_time_ = 0;
     private float prev_A = 0.0f;
-    private boolean waiting_ = false;
+    private float last_max = 0.0f;
 
-    private void detectStep() {
+    private void detectStep()  {
         float A = (float)Math.sqrt(ax*ax + ay*ay + az*az);
-        /*long current_time = new Date().getTime();
-        if (A < 11.0f) return;
-        else {
-            if (!waiting_ && A < prev_A) {
-                // Found max
-                // Count step and wait
-                total_steps++;
-                last_step_time_ = current_time;
-                ctx.onStepCount(total_steps);
+        Log.d(TAG, "Acc: "  + String.valueOf(A));
 
-                waiting_ = true;
-            }
-            else if (current_time - last_step_time_ > 50 && waiting_) {
-                waiting_ = false;
-            }
+        if(A>last_max) A=last_max;
+        if (prev_A>A && prev_A>01.0f && A<01.0f && last_max>4.0f ){
+            total_steps += 1;
+            Log.d(TAG, "Acc: "  + String.valueOf(total_steps));
+            ctx.onStepCount(total_steps);
+            last_max = 0;
         }
-        prev_A = A;*/
+        prev_A = A;/*
         //Log.d(TAG, "Acc: " + new Date().getTime() + " " + String.valueOf(A));
 
         if (A_5 > A_8 && A_5 > A_7 &&
@@ -126,7 +122,7 @@ public class Accelerometer implements SensorEventListener {
                 ctx.onStepCount(total_steps);
             }
         }
-        A_8 = A_7; A_7 = A_6; A_6 = A_5; A_5 = A_4; A_4 = A_3; A_3 = A_2; A_2 = A_1; A_1 = A;
+        A_8 = A_7; A_7 = A_6; A_6 = A_5; A_5 = A_4; A_4 = A_3; A_3 = A_2; A_2 = A_1; A_1 = A;*/
     }
 
     protected void onDestroy() {

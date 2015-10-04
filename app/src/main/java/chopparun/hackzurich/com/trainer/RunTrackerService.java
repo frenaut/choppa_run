@@ -97,7 +97,6 @@ public class RunTrackerService extends Service {
         // Get _LocationListener
         //location_listener_ = new _LocationListener(this);
 
-        // TODO: Make run in foreground
 
         steps_= new ArrayList<>();
         start_time_ = new Date().getTime();
