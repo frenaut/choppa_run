@@ -102,13 +102,11 @@ public class RunTrackerService extends Service {
         steps_= new ArrayList<>();
         start_time_ = new Date().getTime();
 
-        /*
         timer_.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 check();
             }
-        }, new Date(), 3000);
-        */
+        }, new Date(), 500);
     }
 
     @Override
@@ -139,8 +137,6 @@ public class RunTrackerService extends Service {
         addSteps(current_time, new_step_count);
 
         total_dist_ += 1;//0.65;
-
-        check();
     }
 
     public void check() {
@@ -264,7 +260,7 @@ public class RunTrackerService extends Service {
         int steps_back =  (int) (interval_/dtime_);
         if (steps_.size()> steps_back+1)   {
             // at 500ms per entry, 10s corresponds to 20 entries ago
-            vel = (float)(new_step_count - steps_.get(steps_.size()-steps_back));
+            vel = (float)(new_step_count - steps_.get(steps_.size()-steps_back-1));
             vel = vel/(interval_/1000); // in steps/s
             Log.d(TAG, "Step count " + interval_+ "s ago: "+ steps_.get(steps_.size()-steps_back));
         }
@@ -279,7 +275,7 @@ public class RunTrackerService extends Service {
 
         // Flags to help understand metrics
         boolean speed_stopped = vel_normalized < 16;
-        boolean speed_slow    = vel_normalized > 15 && vel_normalized < 96;
+        boolean speed_slow    = vel_normalized > 25 && vel_normalized < 96;
         boolean speed_good    = vel_normalized > 95 && vel_normalized < 121;
         boolean speed_fast    = vel_normalized > 120 && vel_normalized < 151;
         boolean speed_toofast = vel_normalized > 150;

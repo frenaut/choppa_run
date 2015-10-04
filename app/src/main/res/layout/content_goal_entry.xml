@@ -101,7 +101,7 @@
             <TextView
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:text="seconds"
+                android:text="minute(s)"
                 android:id="@+id/goal_time_unit"
                 android:gravity="left" />
         </TableRow>
@@ -124,13 +124,13 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:ems="10"
-                android:text="100"
+                android:text="300"
                 android:id="@+id/goal_distance_input"
                 />
             <TextView
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:text="meters"
+                android:text="meter(s)"
                 android:id="@+id/goal_distance_unit"
                 android:gravity="left" />
         </TableRow>
