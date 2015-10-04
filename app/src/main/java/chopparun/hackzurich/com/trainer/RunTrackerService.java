@@ -132,13 +132,13 @@ public class RunTrackerService extends Service {
     }
 
     // Main pipeline
-    public void onStepCount(int new_step_count, float dist_meas) {
+    public void onStepCount(int new_step_count) {
         Log.d(TAG, "new_step_count = " + String.valueOf(new_step_count));
 
         long current_time = new Date().getTime();
         addSteps(current_time, new_step_count);
 
-        total_dist_ += dist_meas / 0.95e6;
+        total_dist_ += 1;//0.65;
     }
 
     public void check() {
