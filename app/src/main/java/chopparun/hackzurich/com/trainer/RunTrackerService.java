@@ -248,7 +248,8 @@ public class RunTrackerService extends Service {
             }
 
             //       - avg. velocity needed to reach goal
-            target_vel = left_time > 0 ? left_dist*1e3 / left_time : target_dist_ / target_time_; // in m/s
+            target_vel = left_time > 0 ?
+                    left_dist*1e3 / left_time : target_dist_ * 1e3 / target_time_; // in m/s
         }
 
 
@@ -282,24 +283,24 @@ public class RunTrackerService extends Service {
         boolean time_more   = time_normalized > 100;
 
         // Associate metrics with category
-        // TODO : more categories
         String category = "all_good";
         if (speed_stopped) category = "stopping";
         else if (speed_slow) category = "too_slow";
 
         if (time_start) {
             if (speed_toofast) category = "too_fast";
+            if (speed_fast) category = "perfect";
         }
         if (time_middle) {
-            if (speed_good) category = "perfect";
+            if (speed_good || speed_fast) category = "perfect";
             else if (speed_toofast) category = "too_fast";
         } else if (time_end) {
             if (speed_good) category = "all_good";
-            else if (speed_fast) category = "perfect";
+            else if (speed_fast || speed_toofast) category = "perfect";
         } else if (time_more) {
             if (speed_stopped) category = "finish";
-            else if (speed_good) category = "all_good";
-            else if (speed_fast) category = "perfect";
+            else if (speed_good || speed_slow) category = "all_good";
+            else if (speed_fast || speed_toofast) category = "perfect";
         }
         Log.d(TAG, "Normalized velocity: "+ vel_normalized);
         Log.d(TAG, "Category picked: " + category);
