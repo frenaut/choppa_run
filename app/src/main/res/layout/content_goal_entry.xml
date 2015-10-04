@@ -24,6 +24,7 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="119dp"
+            android:layout_marginBottom="-4dp"
             android:layout_gravity="center"
             android:id="@+id/TrainerRow"
             android:gravity="center_horizontal">
@@ -31,10 +32,7 @@
             <ImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_marginBottom="0dp"
+                android:layout_margin="15dp"
                 android:gravity="center"
                 android:id="@+id/Picker_Arnie"
                 android:onClick="pickTrainer" />
@@ -42,10 +40,7 @@
             <ImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:layout_marginLeft="3dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_marginBottom="-3dp"
+                android:layout_margin="15dp"
                 android:gravity="center"
                 android:id="@+id/Picker_Sammi"
                 android:onClick="pickTrainer" />
@@ -57,6 +52,8 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="117dp"
+            android:layout_marginTop="-4dp"
+            android:layout_marginBottom="5dp"
             android:layout_gravity="center"
             android:id="@+id/TrainerRow"
             android:gravity="center_horizontal|top">
@@ -65,10 +62,7 @@
             <ImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_marginBottom="-3dp"
+                android:layout_margin="15dp"
                 android:gravity="center"
                 android:id="@+id/Picker_Jacki"
                 android:onClick="pickTrainer" />
@@ -76,10 +70,7 @@
             <ImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:layout_marginLeft="3dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_marginBottom="-3dp"
+                android:layout_margin="15dp"
                 android:gravity="center"
                 android:id="@+id/Picker_Star"
                 android:onClick="pickTrainer" />
@@ -87,8 +78,9 @@
         </LinearLayout>
 
         <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
 
             <TextView
                 android:layout_width="90dp"
@@ -98,7 +90,7 @@
                 android:gravity="right" />
 
             <EditText
-                android:layout_width="match_parent"
+                android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:ems="10"
@@ -107,9 +99,9 @@
                 />
 
             <TextView
-                android:layout_width="10dp"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:text=""
+                android:text="seconds"
                 android:id="@+id/goal_time_unit"
                 android:gravity="left" />
         </TableRow>
@@ -117,7 +109,7 @@
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center_horizontal"
+            android:gravity="center"
             >
 
             <TextView
@@ -128,7 +120,7 @@
                 android:gravity="right" />
 
             <EditText
-                android:layout_width="match_parent"
+                android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:ems="10"
@@ -136,9 +128,9 @@
                 android:id="@+id/goal_distance_input"
                 />
             <TextView
-                android:layout_width="10dp"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:text=""
+                android:text="meters"
                 android:id="@+id/goal_distance_unit"
                 android:gravity="left" />
         </TableRow>
